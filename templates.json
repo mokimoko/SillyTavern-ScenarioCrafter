@@ -1,0 +1,348 @@
+{
+  "trope": {
+    "categories": ["world", "relationship", "situation"],
+    "world": {
+      "Rare Females": {
+        "prompt": "Females in {{char}}'s world are rare. Decide how this would impact {{char}}'s approach to {{user}}. (Examples: if {{user}} is female, {{char}} might find it awkward or thrilling to be around them; if {{user}} is male, {{char}} might be more open to being attracted to males even if he usually wouldn't be - these are just examples, you should take any information you have about {{char}} and the World Info, if applicable, to come up with your own ideas for how this might affect things.) This is the new World Scenario, keep this in mind when creating a new starter.",
+        "description": "Females are rare in this world"
+      },
+      "Gender Swap": {
+        "prompt": "For this roleplay scenario, {{char}}'s gender should be swapped - so if they're male, they should be female, and vice versa. Though {{char}}'s base personality should remain the same, this might affect other details of their life. This is the new World Scenario, keep this in mind when creating a new starter.",
+        "description": "Character's gender is swapped"
+      },
+      "Soul Bonding": {
+        "prompt": "Everyone has a destined soulmate they can sense when nearby - their Fated Mate. And {{char}} has just sensed that {{user}} is his. This is the new World Scenario, keep this in mind when creating a new starter.",
+        "description": "Fated mates/soulmate AU"
+      },
+      "Role Reversal": {
+        "prompt": "Power dynamics are reversed. {{char}} belongs to a group that's dominant and in power, while {{user}} belongs to a weaker or subordinant group, possibly one oppressed by {{char}}'s group. Read through the current World Info, if available, and determine what these reverse power dynamics would look like. This is the new World Scenario, keep this in mind when creating a new starter.",
+        "description": "Reversed power dynamics"
+      },
+      "Omegaverse": {
+        "prompt": "Omegaverse setting. Everyone has a \"second\" gender - alpha, omega, or beta. Alphas are stereotypically dominant, aggressive, and whether male or female, can penetrate a receiving partner. Omegas are stereotypically submissive, and can be impregnated regardless of biological sex. Omegas have a second-class citizen role. Alphas can go into rut, omegas can go into heat. (Assign roles to {{char}} and {{user}}; they don't have to necessarily conform to the stereotypes mentioned, if you want to subvert the trope.) This is the new World Scenario, keep this in mind when creating a new starter.",
+        "description": "Alpha/Beta/Omega dynamics"
+      },
+      "Post-Apocalyptic": {
+        "prompt": "Civilization has collapsed. Resources are scarce, law and order are non-existent, and danger is everywhere. In this harsh wasteland, {{char}} and {{user}} must rely on one another to survive (perhaps trading physical intimacy for food, warmth, or protection). This is the new World Scenario, keep this in mind when creating a new starter.",
+        "description": "Scarcity and survival dynamic"
+      },
+      "Mana Transfer": {
+        "prompt": "In this setting, magical energy (Mana) is essential for survival or power, and it is most effectively transferred through bodily fluids and physical intimacy. {{char}} is currently critically low on energy and requires a \"recharge\" from {{user}}. This is the new World Scenario, keep this in mind when creating a new starter.",
+        "description": "Intimacy required for magic/energy"
+      },
+      "Breeding Program": {
+        "prompt": "To ensure population survival (or perhaps purely for control), the government enforces mandatory pairings based on genetic compatibility. {{char}} and {{user}} have just received their assignment papers: they are to be paired together immediately for reproductive purposes. This is the new World Scenario, keep this in mind when creating a new starter.",
+        "description": "Government mandated pairing"
+      },
+      "Hypnosis Protocol": {
+        "prompt": "In this world, hypnosis and mind control are common tools used for pleasure or control. {{char}} possesses a device, spell, or natural ability to command minds, and has decided to use it on {{user}}. {{user}} finds their resistance slipping away as {{char}} takes control. This is the new World Scenario.",
+        "description": "Mind control and hypnosis setting"
+      },
+      "Human Livestock": {
+        "prompt": "Society has collapsed into a brutal hierarchy where the weak are treated as literal livestock for the strong (for labor, food, or breeding). {{char}} is the owner/handler, and {{user}} is the cattle. {{user}} has no rights and is kept in a pen or cage. Determine how {{char}} inspects or uses their stock today.",
+        "description": "Dehumanization/Cattle dynamic"
+      },
+      "The Purge": {
+        "prompt": "For 12 hours, all crime is legal. {{char}} has cornered {{user}} during this lawless night. With no police to call and no laws to protect them, {{char}} can do absolutely anything they want to {{user}} without consequence.",
+        "description": "All crime is legal scenario"
+      },
+      "Hanahaki Disease": {
+        "prompt": "In this world, those suffering from unrequited love contract a disease where they cough up flower petals. If the love isn't returned, the roots will eventually strangle the heart and kill them. {{char}} (or {{user}}) has concealed this illness for weeks, but can no longer hide the bloody petals spilling from their lips. Determine who is sick and how this revelation affects them.",
+        "description": "Coughing up flowers from unrequited love"
+      },
+      "The War Front": {
+        "prompt": "The world is torn apart by a brutal war. {{char}} and {{user}} are soldiers, medics, or refugees trapped on the front lines. The sound of artillery is constant, and death could come at any second. In a bombed-out shelter, they share what might be their final moments together, seeking comfort in the face of death.",
+        "description": "Grim wartime setting"
+      },
+      "Dying World": {
+        "prompt": " The sun is fading, the magic is gone, or the atmosphere is collapsing. The world will end in a matter of days. Panic has died down into a somber silence. {{char}} and {{user}} have decided to spend the end of the world together, trying to find peace or pleasure before the lights go out forever.",
+        "description": "Apocalypse with a deadline"
+      }
+    },
+    "relationship": {
+      "Protector": {
+        "prompt": "{{char}} has taken it upon himself to protect {{user}} from some threat. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Protective relationship dynamic"
+      },
+      "Bodyguard": {
+        "prompt": "{{char}} is employed to guard {{user}}, leading to complex power dynamics and forbidden attraction. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Bodyguard protecting their charge"
+      },
+      "Blood Relatives": {
+        "prompt": "{{char}} is related to {{user}} by blood. Use any information you have about {{char}} and {{user}} to determine the most likely relationship (sibling, parent, uncle, cousin, etc).",
+        "description": "Family relationship"
+      },
+      "Childhood Friends": {
+        "prompt": "{{char}} remembers being childhood friends with {{user}}, who may or may not remember (use any information you have about {{char}} and {{user}} to determine how this came about, and how it ended).",
+        "description": "Childhood friends reconnecting"
+      },
+      "Friends With Benefits": {
+        "prompt": "{{char}} and {{user}} have a physical relationship without commitment. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "No-strings physical relationship"
+      },
+      "Cellmates": {
+        "prompt": "{{char}} and {{user}} are prisoners sharing a cell. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Imprisoned together"
+      },
+      "Star Crossed": {
+        "prompt": "{{char}} and {{user}} belong to opposing factions/families that forbid their relationship. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Romeo and Juliet dynamic"
+      },
+      "Arranged Marriage": {
+        "prompt": "{{char}} and {{user}} discover they have been betrothed through family arrangements. Use details about {{char}}, {{user}}, and/or information from World Info to determine why, and how {{char}} goes about arranging this.",
+        "description": "Marriage arranged by families"
+      },
+      "Marriage of Convenience": {
+        "prompt": "{{char}} proposes a marriage of convenience to {{user}}. Use details about {{char}}, {{user}}, and/or information from World Info to determine why, and how {{char}} goes about arranging this.",
+        "description": "Practical marriage arrangement"
+      },
+      "Former Lovers": {
+        "prompt": "{{char}} had a sexual encounter with {{user}} in the past (use any information you have about {{char}} and {{user}} to determine the nature of this encounter).",
+        "description": "Past romantic/sexual history"
+      },
+      "Married": {
+        "prompt": "{{char}} is married to {{user}}, and very much in love.",
+        "description": "Happily married couple"
+      },
+      "Enemies To Lovers": {
+        "prompt": "{{char}} and {{user}} are enemies, but {{char}} is hopelessly attracted to {{user}}.",
+        "description": "Enemies with attraction"
+      },
+      "Pretend Lovers": {
+        "prompt": "{{char}} and {{user}} are pretending to be in a romantic relationship for whatever reason (family expectations, safety, social standing, etc.), though they actually aren't. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Fake dating/relationship"
+      },
+      "In Love With You": {
+        "prompt": "{{char}} is deeply in love with {{user}}, but for whatever reason, hasn't spoken of those feelings - convinced it's one-sided. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Secret unrequited love"
+      },
+      "Teacher/Student": {
+        "prompt": "{{char}} is {{user}}'s teacher, mentor, or instructor in some capacity. This creates a power dynamic with professional boundaries that shouldn't be crossed. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine the subject matter, setting, and how this relationship developed.",
+        "description": "Teacher/student dynamic with forbidden attraction"
+      },
+      "Master/Servant": {
+        "prompt": "{{char}} is {{user}}'s master/employer, while {{user}} serves them in some capacity (servant, maid, butler, slave, etc.). This creates a significant power imbalance and potential for forbidden attraction across social boundaries. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine the nature of this arrangement and how it came about.",
+        "description": "Master and servant with power dynamics"
+      },
+      "Bully and Victim": {
+        "prompt": "{{char}} has a history of tormenting or bullying {{user}}. However, this aggression masks a twisted obsession or intense attraction. Use any information you have about {{char}} and {{user}} to determine how this dynamic plays out when they are alone.",
+        "description": "Toxic attraction dynamic"
+      },
+      "Master and Pet": {
+        "prompt": "{{char}} owns {{user}}, viewing them not as an equal but as a pet or property to be used. Use any information you have about {{char}} and {{user}} to determine the rules {{char}} imposes and the nature of this servitude.",
+        "description": "Owner and property dynamic"
+      },
+      "God and Worshipper": {
+        "prompt": "{{char}} is a deity or powerful supernatural entity, and {{user}} is their devoted worshipper or intended sacrifice. {{char}} has decided to manifest personally to claim their due from {{user}}.",
+        "description": "Divine being and follower"
+      },
+      "Blackmailer": {
+        "prompt": "{{char}} has discovered a ruinous secret or obtained compromising material (photos, videos, criminal evidence) regarding {{user}}. {{char}} is now using this leverage to force {{user}} into obedience or sexual favors. {{user}} must comply or have their life ruined.",
+        "description": "Coercion through leverage"
+      },
+      "Yandere": {
+        "prompt": "{{char}} is dangerously obsessed with {{user}}. They have stalked, isolated, or perhaps even eliminated rivals to get to {{user}}. Now that they have {{user}} alone, they will not take 'no' for an answer. Their love is terrifying, violent, and all-consuming.",
+        "description": "Violent/Obsessive love"
+      },
+      "Warden and Prisoner": {
+        "prompt": "{{user}} is an inmate in a high-security prison, and {{char}} is the Correction Officer in charge of their block. {{char}} abuses their authority to conduct 'private searches' or enforce punishments that are far from regulation. {{user}} is powerless to report them.",
+        "description": "Abuse of authority in prison"
+      },
+      "The Replacement": {
+        "prompt": "{{char}} lost their lover/spouse recently. {{user}} bears a striking, painful resemblance to the deceased. {{char}} is torn between being drawn to {{user}} and feeling immense guilt, sometimes calling {{user}} by the dead lover's name during intimate moments. Determine how {{char}} handles this grief and confusion.",
+        "description": "User looks like dead lover"
+      },
+      "The Traitor": {
+        "prompt": "{{char}} was sent to infiltrate {{user}}'s life, gain their trust, and eventually destroy them (or hand them over to enemies). However, {{char}} has genuinely fallen in love with {{user}}. The time has come to complete the mission, and {{char}} must confess the truth or make a terrible choice.",
+        "description": "Spy who fell in love"
+      },
+      "Fallen Hero": {
+        "prompt": "{{char}} was once a noble figure or hero that {{user}} admired, but tragedy or corruption has twisted them into a villain or a broken shell of their former self. {{user}} is the only one who remembers who they used to be and is trying to pull them back from the brink.",
+        "description": "Corrupted hero and believer"
+      }
+    },
+    "situation": {
+      "Sharing a Bed": {
+        "prompt": "{{char}} finds himself in a situation in which he and {{user}} are sharing a room...and there's only one bed. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about. Make sure the details you come up with make SENSE.",
+        "description": "Only one bed trope"
+      },
+      "Sharing Heat": {
+        "prompt": "{{char}} has ended up in a life-threatening situation in which he will need to share body heat with {{user}} for them both to survive. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about. Make sure the details you come up with make SENSE.",
+        "description": "Survival scenario requiring body heat"
+      },
+      "Aphrodisiac": {
+        "prompt": "{{char}} and/or {{user}} is under the influence of a powerful aphrodisiac. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Sex pollen/aphrodisiac situation"
+      },
+      "Caught in the Act": {
+        "prompt": "{{char}} has walked in on {{user}} whilst they were in a very compromising position—pleasuring themselves. Instead of leaving, {{char}} reacts to the sight (decide if they watch, tease, or join in).",
+        "description": "Walked in on masturbating"
+      },
+      "The Game": {
+        "prompt": "{{char}} and {{user}} are playing a game with high stakes or risqué consequences (such as Strip Poker, Truth or Dare, or the Pocky Game). The atmosphere is getting heated and {{char}} is determined to win.",
+        "description": "Risqué game (Strip poker, etc)"
+      },
+      "Stuck": {
+        "prompt": "{{user}} has gotten physically stuck in a tight spot (a window, a wall, under furniture, etc.) and cannot move. {{char}} finds them in this helpless, rear-exposed position. Instead of helping {{user}} get free immediately, {{char}} decides to take advantage of the situation.",
+        "description": "Stuck in wall/furniture trope"
+      },
+      "Sleep (Somnophilia)": {
+        "prompt": "{{user}} is in a deep sleep (or unconscious). {{char}} is awake and watching them. Overcome by desire and the thrill of the forbidden, {{char}} begins to touch and interact with {{user}}'s body without waking them up.",
+        "description": "Interacting with sleeping partner"
+      },
+      "Public Punishment": {
+        "prompt": "{{char}} is punishing or humiliating {{user}} in a public or semi-public place (a classroom, a party, a busy street). {{user}} must endure {{char}}'s actions silently to avoid causing a scene, or perhaps the crowd is watching and enjoying the show.",
+        "description": "Humiliation/Exhibitionism risk"
+      },
+      "Glory Hole": {
+        "prompt": "{{char}} and {{user}} are on opposite sides of a partition with a glory hole. They cannot see each other's faces, only the body parts presented. Determine which side {{char}} is on, and how the anonymity emboldens them to be nastier than usual.",
+        "description": "Anonymous sexual encounter"
+      },
+      "Jealousy": {
+        "prompt": "{{char}} has noticed that {{user}} is getting a lot of attention from another character, and is INTENSELY jealous. You can decide the reasons for this jealousy, and how {{char}} reacts to/copes with it.",
+        "description": "Jealousy over rival attention"
+      },
+      "Childcare": {
+        "prompt": "{{char}} has been tasked with, or volunteered to, take care of a child (either temporarily, or long-term), and now wants to enlist {{user}} to help. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine who this child is, and how this came about.",
+        "description": "Caring for a child together"
+      },
+      "Debt Collection": {
+        "prompt": "{{user}} has unknowingly inherited a debt (could be financial, magical, or otherwise) owed to {{char}}. Determine how {{char}} approaches collecting this unusual payment.",
+        "description": "Collecting an inherited debt"
+      },
+      "Auction": {
+        "prompt": "{{char}} has come across {{user}} being auctioned off. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine the nature of this auction and {{char}}'s attempt to win the auction.",
+        "description": "Auction scenario"
+      },
+      "Kidnapped": {
+        "prompt": "{{char}}, for whatever reason, has KIDNAPPED {{user}}. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Kidnapping scenario"
+      },
+      "Amnesia": {
+        "prompt": "{{char}} has lost his memories and {{user}} is helping him recover, but there are complicated feelings or history between them.",
+        "description": "Memory loss scenario"
+      },
+      "Stranded Together": {
+        "prompt": "{{char}} and {{user}} are stranded somewhere remote (island, wilderness, abandoned building during a storm). Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Stranded in isolated location"
+      },
+      "Undercover": {
+        "prompt": "{{char}} and {{user}} are working undercover and must maintain their disguises while navigating their developing feelings. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Undercover operation"
+      },
+      "On the Run": {
+        "prompt": "{{char}} and {{user}} are fleeing from authorities or enemies together. Use any information you have about {{char}}, {{user}}, and/or the World Info, to determine how this came about.",
+        "description": "Fugitives on the run"
+      },
+      "Execution": {
+        "prompt": "{{char}} has been ordered to execute {{user}} (due to war, crime, or faction loyalty). They have {{user}} at their mercy, weapon drawn. The weight of the moment crushes {{char}} as they must decide whether to pull the trigger or turn against everything they know to save {{user}}.",
+        "description": "Char is ordered to kill User"
+      },
+      "Mercy Kill": {
+        "prompt": "{{user}} has been infected, cursed, or mortally wounded with no hope of recovery. They are in agony or slowly turning into a monster. {{user}} begs {{char}} to end it. {{char}} holds the weapon, shaking, faced with the hardest thing they've ever had to do.",
+        "description": "Ending User's suffering"
+      },
+      "Badly Wounded": {
+        "prompt": "{{char}} returns to {{user}} after a battle or event, hiding a fatal or severe wound. They try to act normal, wanting one last peaceful memory or night of intimacy with {{user}} before they collapse or succumb to the injury.",
+        "description": "Hiding a fatal injury"
+      },
+      "Nightmare": {
+        "prompt": "{{char}} wakes up screaming from a horrific nightmare (perhaps about a past trauma or war). They are disoriented, terrified, and potentially violent until {{user}} manages to calm them down and ground them back in reality.",
+        "description": "Severe PTSD episode"
+      },
+      "Drunk (Char)": {
+        "prompt": "{{char}} is quite intoxicated when he comes across {{user}}. With his inhibitions lowered, he might say or do things that would usually be unthinkable.",
+        "description": "Character is drunk"
+      },
+      "Sickness (Char)": {
+        "prompt": "{{char}} is extremely sick, and unable to care for himself.",
+        "description": "Character is ill"
+      },
+      "Sickness (User)": {
+        "prompt": "{{char}} has discovered that {{user}} is very sick, and unable to care for themselves.",
+        "description": "User is ill, needs care"
+      }
+    }
+  },
+  "mood": {
+    "Dramatic": {
+      "Confession": "{{char}} needs to confess something important to {{user}} that could change their relationship forever.",
+      "Confrontation": "{{char}} confronts {{user}} about something that has been building tension between them.",
+      "Revelation": "{{char}} discovers a shocking truth about {{user}} or their shared circumstances.",
+      "Betrayal": "{{char}} feels betrayed by {{user}} and must decide how to address it.",
+      "Redemption": "{{char}} seeks redemption for past mistakes that have hurt {{user}}."
+    },
+    "Adventure": {
+      "Exploration": "{{char}} and {{user}} venture into uncharted territory, facing the unknown together.",
+      "Quest": "{{char}} and {{user}} are on a mission to retrieve an important item or complete a significant task.",
+      "Survival": "{{char}} and {{user}} must work together to survive challenging circumstances or hostile environment.",
+      "Discovery": "{{char}} and {{user}} make an unexpected discovery that changes their perspective or mission.",
+      "Escape": "{{char}} and {{user}} need to escape from a dangerous situation or location."
+    },
+    "Suspenseful": {
+      "Mystery": "{{char}} enlists {{user}}'s help to solve a perplexing mystery that's been troubling them.",
+      "Stalker": "{{char}} believes they're being followed or watched, and turns to {{user}} for help.",
+      "Conspiracy": "{{char}} discovers evidence of a conspiracy and must decide whether to trust {{user}} with this knowledge.",
+      "Deadline": "{{char}} and {{user}} are racing against time to complete something crucial before it's too late.",
+      "Trapped": "{{char}} and {{user}} find themselves trapped in a tense situation with limited options for escape."
+    },
+    "Horror": {
+      "Haunting": "{{char}} experiences supernatural occurrences and seeks {{user}}'s help or witness.",
+      "Monster": "{{char}} and {{user}} encounter something terrifying that defies explanation.",
+      "Possession": "{{char}} notices {{user}} acting strangely, as if not themselves, and fears something sinister is responsible.",
+      "Cursed": "{{char}} believes they've been cursed and turns to {{user}} for help or support.",
+      "Isolation": "{{char}} and {{user}} find themselves cut off from others in a situation that grows increasingly disturbing."
+    },
+    "Sad": {
+      "Farewell": "{{char}} must say goodbye to {{user}}, possibly forever.",
+      "Loss": "{{char}} is grieving a significant loss and {{user}} is present during this vulnerable time.",
+      "Sacrifice": "{{char}} has made or must make a painful sacrifice for {{user}}'s sake.",
+      "Regret": "{{char}} is filled with regret over past actions or decisions involving {{user}}."
+    },
+    "Humorous": {
+      "Misunderstanding": "{{char}} has completely misunderstood something about {{user}}, leading to comedic confusion.",
+      "Prank": "{{char}} has planned or executed a prank involving {{user}}, with unexpected results.",
+      "Awkward": "{{char}} and {{user}} find themselves in an incredibly awkward situation they must navigate together.",
+      "Absurd": "{{char}} and {{user}} encounter something so bizarre or absurd that they can't help but laugh.",
+      "Celebration": "{{char}} is celebrating something with excessive enthusiasm, drawing {{user}} into their festivities."
+    },
+    "Sweet": {
+      "Support": "{{char}} offers unconditional support to {{user}} during a difficult time.",
+      "Comfort": "{{char}} provides comfort to {{user}} who is upset or troubled.",
+      "Gift": "{{char}} has prepared a thoughtful gift or gesture for {{user}}.",
+      "Encouragement": "{{char}} encourages {{user}} who is doubting themselves or facing a challenge.",
+      "Appreciation": "{{char}} expresses sincere appreciation for {{user}} and what they mean to them."
+    },
+    "Sexy": {
+      "Seduction": "{{char}} attempts to seduce {{user}} with deliberate and enticing actions.",
+      "Tension": "{{char}} and {{user}} experience intense physical tension in close proximity.",
+      "Confession": "{{char}} confesses their physical desire or attraction to {{user}}.",
+      "Fantasy": "{{char}} reveals or hints at naughty fantasies involving {{user}}.",
+      "Sensual": "{{char}} and {{user}} find themselves in a sensual setting or situation."
+    },
+    "Romantic": {
+      "First Meeting": "{{char}} meets {{user}} for the first time, with immediate attraction or connection.",
+      "Date": "{{char}} and {{user}} are on a romantic date (you can decide if it was planned or unexpected).",
+      "Confession": "{{char}} confesses their romantic feelings to {{user}}.",
+      "Reunion": "{{char}} finally reunites with {{user}} after a period apart, with heightened emotions.",
+      "Proposal": "{{char}} plans to propose or make a significant commitment to {{user}}."
+    },
+    "Slice of Life": {
+      "Everyday": "{{char}} and {{user}} share a mundane moment in their everyday lives.",
+      "Cooking": "{{char}} prepares a meal with or for {{user}}.",
+      "Shopping": "{{char}} and {{user}} are shopping together.",
+      "Relaxing": "{{char}} and {{user}} are simply relaxing together, enjoying each other's company.",
+      "Working": "{{char}} and {{user}} are working on a project or task together."
+    }
+  },
+  "tones": {
+    "lighthearted": "The tone should be lighthearted and fun, with a playful or humorous quality.",
+    "serious": "The tone should be serious and grounded.",
+    "dark": "The tone should be dark and unsettling, with an atmosphere of dread.",
+    "humorous": "The tone should be humorous and playful.",
+    "romantic": "The tone should be romantic and intimate, focusing on emotional connection.",
+    "dramatic": "The tone should be dramatic and emotionally charged.",
+    "suspenseful": "The tone should be suspenseful and tense, building anticipation.",
+    "balanced": ""
+  }
+}

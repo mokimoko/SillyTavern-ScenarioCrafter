@@ -1,0 +1,1192 @@
+/* ================================================================
+   SCENARIOCRAFTER - STYLES
+   Nebula Dark aesthetic: dark transparency, sharp corners, muted palette
+   Matches UI Bedazzler / Dynamic Events design language
+   ================================================================ */
+
+/* ===========================
+   CSS VARIABLES
+   =========================== */
+:root {
+    --sc-accent: rgba(151, 167, 198, 1);
+    --sc-accent-dim: rgba(151, 167, 198, 0.4);
+    --sc-accent-bg: rgba(100, 140, 220, 0.15);
+    --sc-accent-border: rgba(100, 140, 220, 0.25);
+    --sc-bg-card: rgba(255, 255, 255, 0.03);
+    --sc-bg-input: rgba(0, 0, 0, 0.25);
+    --sc-bg-modal: rgba(18, 18, 22, 0.97);
+    --sc-border: rgba(255, 255, 255, 0.08);
+    --sc-border-hover: rgba(255, 255, 255, 0.15);
+    --sc-text: rgba(207, 203, 197, 1);
+    --sc-text-muted: rgba(207, 203, 197, 0.5);
+    --sc-transition: all 0.15s ease;
+}
+
+/* ===========================
+   EXTENSION BUTTON
+   =========================== */
+#scenariocrafter_button {
+    cursor: pointer;
+    transition: var(--sc-transition);
+}
+
+/* ===========================
+   MODAL STRUCTURE
+   =========================== */
+.scenariocrafter-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    font-family: inherit;
+    color: var(--sc-text);
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.scenariocrafter-modal-visible {
+    opacity: 1;
+}
+
+.scenariocrafter-modal-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.scenariocrafter-modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    z-index: 2;
+    width: min(1020px, 94vw);
+    height: min(86vh, 760px);
+    background: var(--sc-bg-modal);
+    border: 1px solid var(--sc-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.scenariocrafter-modal-visible .scenariocrafter-modal-content {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+}
+
+/* Modal Header */
+.scenariocrafter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.scenariocrafter-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.3px;
+    margin: 0;
+}
+
+.scenariocrafter-title i {
+    font-size: 14px;
+    color: var(--sc-accent-dim);
+}
+
+.scenariocrafter-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 6px;
+    transition: color 0.15s;
+    line-height: 1;
+}
+
+.scenariocrafter-close:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Modal Body Layout */
+.scenariocrafter-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Left Pane */
+.scenariocrafter-config {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 8px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+/* Right Pane */
+.scenariocrafter-output-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* ===========================
+   SECTIONS & CARDS
+   =========================== */
+.scenariocrafter-section {
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.scenariocrafter-section:last-of-type {
+    border-bottom: none;
+}
+
+.scenariocrafter-section-title {
+    margin: 0 0 5px 0;
+    font-size: 0.72em;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* ===========================
+   FORM INPUTS
+   =========================== */
+.scenariocrafter-context-selectors {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.scenariocrafter-context-selectors label:not(.scenariocrafter-checkbox-label):not(.scenariocrafter-radio-label) {
+    font-size: 0.76em;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.45);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.scenariocrafter-select,
+.scenariocrafter-input,
+.scenariocrafter-textarea,
+.scenariocrafter-input-sm {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--sc-border);
+    border-radius: 3px;
+    padding: 4px 7px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.86em;
+    font-family: inherit;
+    width: 100%;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.scenariocrafter-select option {
+    background: rgb(25, 25, 30);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.scenariocrafter-input-sm {
+    width: 55px;
+    padding: 3px 7px;
+    text-align: center;
+}
+
+.scenariocrafter-select:focus,
+.scenariocrafter-input:focus,
+.scenariocrafter-textarea:focus,
+.scenariocrafter-input-sm:focus {
+    outline: none;
+    border-color: rgba(100, 140, 220, 0.35);
+}
+
+.scenariocrafter-textarea {
+    resize: vertical;
+    min-height: 50px;
+    line-height: 1.5;
+}
+
+/* Small select variant */
+.scenariocrafter-select-sm {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 7px;
+    font-size: 0.84em;
+}
+
+/* ===========================
+   BUTTONS
+   =========================== */
+.scenariocrafter-btn,
+.scenariocrafter-btn-sm {
+    padding: 4px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    font-size: 0.82em;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.65);
+    white-space: nowrap;
+}
+
+.scenariocrafter-btn-sm {
+    padding: 3px 8px;
+    font-size: 0.78em;
+}
+
+.scenariocrafter-btn:hover:not(:disabled),
+.scenariocrafter-btn-sm:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.scenariocrafter-btn:disabled,
+.scenariocrafter-btn-sm:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Button variants */
+.scenariocrafter-btn-primary {
+    background: var(--sc-accent-bg);
+    border-color: var(--sc-accent-border);
+    color: rgba(160, 190, 240, 0.95);
+}
+
+.scenariocrafter-btn-primary:hover:not(:disabled) {
+    background: rgba(100, 140, 220, 0.25);
+    color: rgba(180, 205, 250, 1);
+}
+
+.scenariocrafter-btn-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--sc-border);
+}
+
+.scenariocrafter-btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.scenariocrafter-btn-success {
+    background: rgba(60, 160, 110, 0.2);
+    border-color: rgba(60, 160, 110, 0.3);
+    color: rgba(120, 210, 160, 0.95);
+}
+
+.scenariocrafter-btn-success:hover:not(:disabled) {
+    background: rgba(60, 160, 110, 0.3);
+    color: rgba(140, 220, 175, 1);
+}
+
+.scenariocrafter-btn-danger {
+    background: rgba(200, 60, 60, 0.2);
+    border-color: rgba(200, 60, 60, 0.3);
+    color: rgba(230, 120, 120, 0.95);
+}
+
+.scenariocrafter-btn-danger:hover:not(:disabled) {
+    background: rgba(200, 60, 60, 0.3);
+    color: rgba(240, 150, 150, 1);
+}
+
+.scenariocrafter-btn-icon {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    padding: 2px 5px;
+    transition: color 0.15s;
+    font-size: 0.82em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.scenariocrafter-btn-icon:hover:not(:disabled) {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.scenariocrafter-btn-icon:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Full-width generate button */
+.scenariocrafter-generate-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 6px 12px;
+    flex-shrink: 0;
+}
+
+/* ===========================
+   TYPE SELECTION TABS
+   =========================== */
+.scenariocrafter-type-buttons {
+    display: flex;
+    gap: 2px;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 2px;
+}
+
+.scenariocrafter-type-btn {
+    flex: 1;
+    padding: 5px 3px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.7em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.scenariocrafter-type-btn i {
+    font-size: 12px;
+}
+
+.scenariocrafter-type-btn:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.scenariocrafter-type-btn.active {
+    background: rgba(100, 140, 220, 0.12);
+    color: rgba(160, 190, 240, 0.95);
+    border-color: rgba(100, 140, 220, 0.2);
+}
+
+.scenariocrafter-type-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ===========================
+   BUTTON GRIDS (for options)
+   =========================== */
+.scenariocrafter-button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 3px;
+}
+
+.scenariocrafter-button-grid button {
+    padding: 5px 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    font-size: 0.78em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.scenariocrafter-button-grid button:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.scenariocrafter-button-grid button.active {
+    background: rgba(100, 140, 220, 0.12);
+    border-color: rgba(100, 140, 220, 0.25);
+    color: rgba(160, 190, 240, 0.95);
+}
+
+/* ===========================
+   DESCRIPTION BOX
+   =========================== */
+.scenariocrafter-description {
+    margin-top: 6px;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 2px solid rgba(100, 140, 220, 0.3);
+    font-size: 0.78em;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===========================
+   CHECKBOXES & RADIOS
+   =========================== */
+.scenariocrafter-checkbox-label,
+.scenariocrafter-radio-label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    padding: 2px 0 !important;
+    user-select: none !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 0.84em !important;
+    margin: 0 !important;
+}
+
+.scenariocrafter-checkbox-label:hover,
+.scenariocrafter-radio-label:hover {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.scenariocrafter-checkbox-label input[type="checkbox"],
+.scenariocrafter-checkbox-label input[type="radio"],
+.scenariocrafter-radio-label input[type="checkbox"],
+.scenariocrafter-radio-label input[type="radio"] {
+    cursor: pointer !important;
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px !important;
+    min-height: 13px !important;
+    accent-color: var(--sc-accent) !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-block !important;
+    position: relative !important;
+    opacity: 1 !important;
+    z-index: 1 !important;
+}
+
+.scenariocrafter-radio-label input[type="radio"] {
+    -webkit-appearance: radio !important;
+    -moz-appearance: radio !important;
+}
+
+.scenariocrafter-checkbox-label > span,
+.scenariocrafter-radio-label > span {
+    display: inline-block !important;
+    flex: 1 !important;
+}
+
+.scenariocrafter-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 3px 6px;
+}
+
+.scenariocrafter-sub-option {
+    margin-left: 18px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    padding: 5px 8px;
+    border-left: 2px solid rgba(100, 140, 220, 0.25);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* ===========================
+   OUTPUT PANE
+   =========================== */
+.scenariocrafter-output-header {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    padding: 6px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    min-height: 24px;
+    flex-shrink: 0;
+}
+
+.scenariocrafter-output-content {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 12px 14px;
+    overflow-y: auto;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.scenariocrafter-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.25);
+    gap: 10px;
+    text-align: center;
+    font-size: 0.86em;
+}
+
+.scenariocrafter-placeholder i {
+    opacity: 0.4;
+}
+
+#sc-generated-text {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: 0.9em;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.8);
+    height: 100%;
+    width: 100%;
+    font-family: inherit;
+    resize: none;
+}
+
+#sc-generated-text:focus {
+    box-shadow: none;
+    background: transparent;
+    outline: none;
+}
+
+.scenariocrafter-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--sc-accent-dim);
+}
+
+.scenariocrafter-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: rgba(220, 80, 80, 0.8);
+    gap: 10px;
+    text-align: center;
+    font-size: 0.86em;
+}
+
+/* ===========================
+   APPLY SECTION
+   =========================== */
+.scenariocrafter-apply-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.scenariocrafter-apply-section .scenariocrafter-section-title {
+    margin-bottom: 2px;
+}
+
+#sc-scenario-note {
+    min-height: 36px;
+    font-size: 0.82em;
+}
+
+/* ===========================
+   POPUPS & MODALS (Secondary)
+   =========================== */
+.scenariocrafter-popup,
+.scenariocrafter-wi-selector {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.65);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.scenariocrafter-popup-overlay {
+    position: absolute;
+    inset: 0;
+}
+
+.scenariocrafter-popup-content {
+    position: relative;
+    width: 90%;
+    max-width: 580px;
+    background: rgba(24, 24, 30, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 90vh;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+}
+
+.scenariocrafter-popup:not([style*="display: none"]) .scenariocrafter-popup-content,
+.scenariocrafter-wi-selector:not([style*="display: none"]) .scenariocrafter-popup-content {
+    transform: scale(1);
+}
+
+.scenariocrafter-popup-content h2,
+.scenariocrafter-popup-content h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scenariocrafter-popup-content h2 i,
+.scenariocrafter-popup-content h3 i {
+    color: var(--sc-accent-dim);
+}
+
+.scenariocrafter-popup-content label {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.84em;
+}
+
+.scenariocrafter-popup-content label > span:first-child {
+    font-weight: 500;
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* ===========================
+   WORLD INFO SELECTOR
+   =========================== */
+.scenariocrafter-wi-selector .scenariocrafter-popup-content {
+    max-width: 780px;
+    height: 80vh;
+    max-height: 80vh;
+}
+
+.scenariocrafter-wi-search {
+    display: flex;
+    gap: 8px;
+}
+
+.scenariocrafter-wi-search input {
+    flex: 1;
+    max-width: 260px;
+}
+
+.scenariocrafter-wi-search button {
+    white-space: nowrap;
+    min-width: 70px;
+}
+
+.scenariocrafter-wi-books {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.scenariocrafter-wi-book {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+
+.scenariocrafter-wi-book:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.scenariocrafter-wi-book-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 7px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+}
+
+.scenariocrafter-wi-book-header:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.scenariocrafter-wi-book-toggle {
+    width: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scenariocrafter-wi-book-toggle i {
+    transition: transform 0.15s;
+    font-size: 0.76em;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.scenariocrafter-wi-book-header h3 {
+    margin: 0;
+    font-size: 0.86em;
+    color: rgba(255, 255, 255, 0.75);
+    flex: 1;
+    font-weight: 500;
+}
+
+.scenariocrafter-wi-book-count {
+    font-size: 0.76em;
+    opacity: 0.5;
+    font-weight: normal;
+    margin-right: 0.5em;
+}
+
+.scenariocrafter-wi-book-actions {
+    display: flex;
+    gap: 0.25em;
+}
+
+.scenariocrafter-wi-entries {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 3px;
+    padding: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.scenariocrafter-wi-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 4px 7px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.scenariocrafter-wi-entry:hover {
+    background: rgba(100, 140, 220, 0.08);
+    border-color: rgba(100, 140, 220, 0.2);
+}
+
+.scenariocrafter-wi-entry-header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+.scenariocrafter-wi-entry-header input[type="checkbox"] {
+    flex-shrink: 0;
+}
+
+.scenariocrafter-wi-entry-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.scenariocrafter-wi-entry-title {
+    flex: 1;
+    font-size: 0.8em;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 22ch;
+}
+
+.scenariocrafter-wi-entry-keys {
+    font-size: 0.66em;
+    color: rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 18px;
+    max-width: 22ch;
+}
+
+.scenariocrafter-wi-entry-content {
+    font-size: 0.66em;
+    color: rgba(255, 255, 255, 0.25);
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 18px;
+    max-width: 22ch;
+}
+
+.scenariocrafter-wi-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.scenariocrafter-wi-footer > div {
+    display: flex;
+    gap: 8px;
+}
+
+/* ===========================
+   PROMPT VIEW
+   =========================== */
+.scenariocrafter-prompt-popup {
+    max-width: 840px !important;
+    width: 90% !important;
+    max-height: 80vh !important;
+}
+
+.scenariocrafter-prompt-view {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.scenariocrafter-prompt-header {
+    flex-shrink: 0;
+}
+
+.scenariocrafter-prompt-header h3 {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 6px 0;
+}
+
+.scenariocrafter-prompt-info {
+    padding: 5px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.scenariocrafter-prompt-messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.scenariocrafter-prompt-message {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.scenariocrafter-prompt-role {
+    background: rgba(100, 140, 220, 0.12);
+    color: rgba(160, 190, 240, 0.9);
+    padding: 5px 10px;
+    font-weight: 600;
+    font-size: 0.7em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.scenariocrafter-prompt-content {
+    padding: 10px 12px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.8em;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.12);
+}
+
+/* ===========================
+   SCROLLBARS (webkit fallback)
+   =========================== */
+.scenariocrafter-config::-webkit-scrollbar,
+.scenariocrafter-output-content::-webkit-scrollbar,
+.scenariocrafter-wi-books::-webkit-scrollbar,
+.scenariocrafter-prompt-messages::-webkit-scrollbar,
+.scenariocrafter-wi-entries::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scenariocrafter-config::-webkit-scrollbar-track,
+.scenariocrafter-output-content::-webkit-scrollbar-track,
+.scenariocrafter-wi-books::-webkit-scrollbar-track,
+.scenariocrafter-prompt-messages::-webkit-scrollbar-track,
+.scenariocrafter-wi-entries::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scenariocrafter-config::-webkit-scrollbar-thumb,
+.scenariocrafter-output-content::-webkit-scrollbar-thumb,
+.scenariocrafter-wi-books::-webkit-scrollbar-thumb,
+.scenariocrafter-prompt-messages::-webkit-scrollbar-thumb,
+.scenariocrafter-wi-entries::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+}
+
+.scenariocrafter-config::-webkit-scrollbar-thumb:hover,
+.scenariocrafter-output-content::-webkit-scrollbar-thumb:hover,
+.scenariocrafter-wi-books::-webkit-scrollbar-thumb:hover,
+.scenariocrafter-prompt-messages::-webkit-scrollbar-thumb:hover,
+.scenariocrafter-wi-entries::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ===========================
+   ANIMATIONS
+   =========================== */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+body.scenariocrafter-modal-open {
+    overflow: hidden;
+}
+
+/* ===========================
+   CUSTOM PROMPT CONTROLS
+   =========================== */
+.scenariocrafter-custom-controls {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+/* ===========================
+   VERSE FILTER NOTICES
+   =========================== */
+.scenariocrafter-verse-notice {
+    padding: 4px 7px;
+    background: rgba(100, 140, 220, 0.08);
+    border: 1px solid rgba(100, 140, 220, 0.15);
+    font-size: 0.76em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* ===========================
+   STORY SUMMARY SECTION
+   =========================== */
+.comprehensive-summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 180px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.comprehensive-summary-item {
+    padding: 5px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: border-color 0.15s;
+}
+
+.comprehensive-summary-item.selected {
+    border-color: rgba(100, 140, 220, 0.2);
+    background: rgba(100, 140, 220, 0.05);
+}
+
+.comprehensive-summary-empty {
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.3);
+    font-style: italic;
+    padding: 6px 0;
+}
+
+.summary-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.summary-item-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 0;
+}
+
+.summary-item-title {
+    font-size: 0.82em;
+    color: rgba(255, 255, 255, 0.7);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.summary-order-badge {
+    font-size: 0.66em;
+    padding: 1px 4px;
+    background: rgba(100, 140, 220, 0.15);
+    color: rgba(160, 190, 240, 0.8);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.summary-item-meta {
+    font-size: 0.7em;
+    color: rgba(255, 255, 255, 0.3);
+    margin-left: 18px;
+    display: flex;
+    gap: 6px;
+}
+
+.summary-item-controls {
+    display: flex;
+    gap: 2px;
+    margin-top: 3px;
+    margin-left: 18px;
+}
+
+.summary-item-controls button {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 2px 5px;
+    font-size: 0.7em;
+    transition: color 0.15s;
+}
+
+.summary-item-controls button:hover:not(:disabled) {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.summary-item-controls button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.custom-summary-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.custom-summary-preview {
+    padding: 5px 7px;
+    margin-top: 3px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.76em;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.custom-summary-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.custom-summary-preview-header strong {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.custom-summary-position {
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.custom-summary-preview-text {
+    line-height: 1.35;
+}
+
+.sc-comprehensive-info {
+    display: block;
+    font-size: 0.7em;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 4px;
+}
+
+/* ===========================
+   RESPONSIVE DESIGN
+   =========================== */
+@media (max-width: 900px) {
+    .scenariocrafter-layout {
+        flex-direction: column;
+    }
+
+    .scenariocrafter-config {
+        width: 100%;
+        max-height: 40vh;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .scenariocrafter-modal-content {
+        width: 96vw;
+        height: 92vh;
+    }
+}
