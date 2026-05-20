@@ -1,8 +1,8 @@
-# Scenario Crafter for SillyTavern
+# Scenario Crafter
 
 Wanna shake things up a bit but not sure what exactly you and {{char}} should actually DO?
 
-Scenario Crafter has a variety of scenarios you can play with. Choose your ~~victim~~ character, the persona you want to use, and one of the numerous scenario options, and generate a unique new greeting. Start a new chat, append to the current one, or rewrite the last message from a different angle.
+Scenario Crafter is a [SillyTavern](https://github.com/SillyTavern/SillyTavern) extension that has a variety of scenarios you can play with. Choose your ~~victim~~ character, the persona you want to use, and one of the numerous scenario options, and generate a unique new greeting. Start a new chat, append to the current one, or rewrite the last message from a different angle.
 
 Choose whether to include chat history, world info, or a summary of past events as context. View the prompt sent to the LLM to see what's going on under the hood.
 
@@ -51,6 +51,17 @@ Settings are in the Extensions drawer under Scenario Crafter.
 - **Writing Style** — The base prompt controlling how scenarios are written. Uses {{char}} and {{user}} placeholders.
 - **Defaults** — Preferred tone, connection profile, context options, and apply mode.
 - **Application** — Scenario note injection toggle and injection depth.
+
+## Installation
+
+Use SillyTavern's built-in extension installer:
+
+1. Open **Extensions** → **Install Extension**
+2. Paste this URL:
+   ```
+   https://github.com/mokimoko/SillyTavern-ScenarioSprites
+   ```
+3. Click **Install** and reload if prompted
 
 ## Tips
 
