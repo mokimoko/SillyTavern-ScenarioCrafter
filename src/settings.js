@@ -4,7 +4,10 @@ const SETTINGS_KEY = 'scenariocrafter_settings';
 
 const DEFAULT_SETTINGS = {
     // Writing Style
-    base_style_prompt: `Write 2-4 paragraphs, with each paragraph being 5-7 sentences long. Use casual prose, plain modern English; absolutely NO purple prose, avoid flowery or cliched phrases at all costs. Punchy, evocative language is best, with interesting or striking visual imagery, visceral details that make us feel like we're really there in the scene. Never state or directly describe {{char}}'s emotions or demeanor. Instead, convey {{char}}'s personality and feelings through mannerisms, tone and dialogue. Write exclusively from {{char}}'s POV in third person past tense. Avoid writing for {{user}}; rather, you should leave this starter open-ended so that {{user}} can interact with {{char}}. Writing for, speaking, thinking, acting, or replying as {{user}} or for any of their actions is FORBIDDEN.`,
+    base_style_prompt: `Write in third person past tense from {{char}}'s POV only. 2-4 paragraphs, 5-7 sentences each.
+- Casual Prose: Plain modern English. BAN purple prose, flowery language, and cliched phrases. Use punchy, evocative language with striking imagery and visceral sensory detail.
+- Show Don't Tell: Never state {{char}}'s emotions directly. Convey feeling through mannerisms, body language, tone, and dialogue.
+- Critical — Do Not Write for {{user}}: NEVER narrate, describe, or imply {{user}}'s actions, dialogue, thoughts, feelings, decisions, or physical reactions. {{user}} is controlled entirely by the player. The scenario must end at a point where {{user}} can act or respond. Any content written from {{user}}'s perspective or depicting what {{user}} does is a violation of this rule.`,
     
     // Connection
     profileId: '',
