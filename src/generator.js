@@ -150,12 +150,11 @@ async function buildGenerationMessages(state, settings, context) {
     const systemPrompt = systemParts.join('\n\n');
 
     // ── Build user prompt (the actual instruction) ─────────────────────────
-    let userPrompt = `IMPORTANT: Respond ONLY with the scenario text itself. Do not include any preamble, explanations, meta-commentary, or thought process. Write the scenario directly.\n\n`;
+    let userPrompt = `Output the scenario text only. No preamble, no meta-commentary, no explanations, no thought process.\nDo not write for ${userName}. ${userName}'s actions, dialogue, thoughts, and reactions are off-limits — the scenario must leave room for ${userName} to act.\n\n`;
 
     if (isRewriteMode) {
-        userPrompt += `You are rewriting the following message from ${charName}'s point of view:\n\n`;
-        userPrompt += `${lastMessage.name}: ${prepareTextWithNames(lastMessage.mes, charName, userName)}\n\n`;
-        userPrompt += `Rewrite this message as ${charName}, keeping the core events and details but expressing it from ${charName}'s perspective. `;
+        userPrompt += `Rewrite the following message as ${charName}. Preserve the core events but write from ${charName}'s perspective. `;
+        userPrompt += `Original:\n${lastMessage.name}: ${prepareTextWithNames(lastMessage.mes, charName, userName)}\n\n`;
         
         if (state.scenarioType === 'custom' && state.customPrompt) {
             const processedCustom = state.customPrompt
@@ -172,7 +171,7 @@ async function buildGenerationMessages(state, settings, context) {
             }
         }
     } else {
-        userPrompt += `Create a new roleplay scenario/greeting for ${charName}. `;
+        userPrompt += `Write a new roleplay scenario/greeting for ${charName}. `;
 
         if (state.scenarioType === 'custom' && state.customPrompt) {
             const processedCustom = state.customPrompt
@@ -278,7 +277,7 @@ async function generateTwist(state, settings, context) {
     }
 
     // Build system prompt with twist - use selected names
-    let systemPrompt = `You are continuing a roleplay chat between ${charName} and ${userName}.\n\n`;
+    let systemPrompt = `Continuing a roleplay between ${charName} and ${userName}.\n\n`;
 
     if (charInfo.description) {
         systemPrompt += `Character Description: ${prepareTextWithNames(charInfo.description, charName, userName)}\n`;
@@ -311,12 +310,12 @@ async function generateTwist(state, settings, context) {
     }).join('\n\n');
 
     systemPrompt += `\nRecent Chat History:\n${historyText}\n`;
-    systemPrompt += `\nIMPORTANT: A sudden plot twist occurs: ${selectedTwist}\n`;
+    systemPrompt += `\nA sudden plot twist occurs: ${selectedTwist}\n`;
 
     if (isRewrite) {
-        systemPrompt += `\nRewrite ${charName}'s most recent response to naturally incorporate this twist. Keep the core scenario but weave in this unexpected development. The twist should feel organic, not forced.`;
+        systemPrompt += `\nRewrite ${charName}'s most recent response to incorporate this twist naturally. Keep the core scenario but weave in this development.`;
     } else {
-        systemPrompt += `\nRespond as ${charName}, naturally incorporating this plot twist. The twist should drive the scene in a new direction.`;
+        systemPrompt += `\nContinue as ${charName}, incorporating this plot twist to drive the scene in a new direction.`;
     }
 
     // Add style guidelines - use selected names
@@ -332,7 +331,7 @@ async function generateTwist(state, settings, context) {
         systemPrompt += `\n\nTone: ${toneModifier}`;
     }
 
-    systemPrompt += `\n\nIMPORTANT: Respond ONLY with the scenario text itself. Do not include any preamble, explanations, meta-commentary, or thought process. Write the scenario directly.\n\nDO NOT explain the twist or be meta about it - just naturally incorporate it into the scene.`;
+    systemPrompt += `\n\nOutput the scenario text only. No preamble, no meta-commentary, no explanations. Do not reference or explain the twist — just write the scene.\nDo not write for ${userName}. ${userName}'s actions, dialogue, thoughts, and reactions are off-limits.`;
 
     const userPrompt = isRewrite 
         ? 'Rewrite your last response with the twist.' 
@@ -693,8 +692,8 @@ function cleanResponse(text) {
 // Generate scenario summary for injection
 export async function generateSummary(scenarioText, charName) {
     try {
-        const systemPrompt = `You are a concise summarizer. Write brief 1-2 sentence factual summaries that capture key situations and settings. Be objective and concise.`;
-        const userPrompt = `Based on this roleplay scenario for ${charName}, write a brief 1-2 sentence factual summary that captures the key situation and setting:\n\n${scenarioText}`;
+        const systemPrompt = `Summarize roleplay scenarios in 1-2 factual sentences. Capture the key situation and setting. Be objective and concise.`;
+        const userPrompt = `Summarize this scenario for ${charName} in 1-2 sentences:\n\n${scenarioText}`;
 
         const result = await generateRaw({
             prompt: userPrompt,
