@@ -8,6 +8,8 @@ Choose whether to include chat history, world info, or a summary of past events 
 
 Enjoy :) -moki
 
+![](https://files.catbox.moe/3xlcqr.png)
+
 ---
 
 ## Scenario Types
@@ -39,10 +41,6 @@ Enjoy :) -moki
 ## Story Summaries
 
 **Custom Summary** — Write your own summary of background events, world state, or character history. Always available. Supports ST macros ({{char}}, {{user}}, {{summary}}, {{getvar::key}}).
-
-**Comprehensive Summaries** — If [Simple Summarizer](https://github.com/mokimoko/SillyTavern-SimpleSummarizer) is installed, Scenario Crafter can pull in comprehensive summaries from its Context Archive, filtered by the selected character. If Summarizer isn't installed, this option is hidden automatically.
-
-Multiple summaries are presented in chronological order. You can reorder them and position your custom summary wherever it fits in the timeline.
 
 ## Settings
 
