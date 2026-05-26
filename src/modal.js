@@ -1311,7 +1311,20 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         this._generationCancelled = false;
         const btn = this.cachedElements.generateBtn;
         const originalHtml = btn.html();
+
+        // Clear any existing injection from a previous scenario so it doesn't persist during generation
+        try {
+            const { extension_prompt_types } = await import('../../../../../script.js');
+            const ctx = SillyTavern.getContext();
+            ctx.setExtensionPrompt('scenariocrafter_inject', '', extension_prompt_types.IN_CHAT, 0, false);
+        } catch (e) {
+            logError('Failed to clear old injection:', e);
+        }
         
+        // Clear stale scenario note from previous generation
+        this.cachedElements.scenarioNote.val('');
+        this.state.scenarioSummary = '';
+
         // Switch to Stop button
         btn.removeClass('scenariocrafter-btn-primary').addClass('scenariocrafter-btn-danger');
         btn.html('<i class="fa-solid fa-stop"></i> Stop');
