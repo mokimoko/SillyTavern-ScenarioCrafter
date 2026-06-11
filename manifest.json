@@ -5,7 +5,7 @@
     "optional": [],
     "minimum_client_version": "1.13.2",
     "js": "index.js",
-    "author": "nrahis",
+    "author": "mokimoko",
     "version": "1.0.0",
     "homePage": "https://github.com/mokimoko/SillyTavern-ScenarioCrafter",
     "auto_update": true
