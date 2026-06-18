@@ -52,13 +52,26 @@ export function getMoodSituations(mood) {
     return templates.mood[mood];
 }
 
-export function getTemplatePrompt(type, category, subcategory) {
+export function getTemplatePrompt(type, category, subcategory, swapped = false) {
     if (type === 'trope') {
-        return templates?.trope?.[category]?.[subcategory]?.prompt || '';
+        const entry = templates?.trope?.[category]?.[subcategory];
+        if (!entry) return '';
+        // Use the swapped prompt only when requested AND one exists; otherwise fall back to default.
+        if (swapped && entry.prompt_swapped) {
+            return entry.prompt_swapped;
+        }
+        return entry.prompt || '';
     } else if (type === 'mood') {
         return templates?.mood?.[category]?.[subcategory] || '';
     }
     return '';
+}
+
+// Returns true only when a trope subcategory has a swapped variant defined.
+// This is the single source of truth for whether the "Who leads?" toggle shows.
+export function hasSwappedPrompt(type, category, subcategory) {
+    if (type !== 'trope') return false;
+    return !!templates?.trope?.[category]?.[subcategory]?.prompt_swapped;
 }
 
 export function getTemplateDescription(type, category, subcategory) {

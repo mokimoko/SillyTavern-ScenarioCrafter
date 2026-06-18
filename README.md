@@ -14,7 +14,7 @@ Enjoy :) -moki
 
 ## Scenario Types
 
-**Tropes** — Romance, Drama, Action, Fantasy, Mystery, Horror, Slice of Life, Comedy, and Sci-Fi. Each category has specific tropes like "Enemies to Lovers," "Fake Dating," "Trapped Together," "Time Loop," and dozens more.
+**Tropes** — Romance, Drama, Action, Fantasy, Mystery, Horror, Slice of Life, Comedy, and Sci-Fi. Each category has specific tropes like "Enemies to Lovers," "Fake Dating," "Trapped Together," "Time Loop," and dozens more. Tropes with an asymmetric power dynamic (Kidnapped, Master/Servant, Blackmailer, etc.) show a **"Who leads?"** toggle that lets you flip who holds the initiative — {{char}} or {{user}}.
 
 **Moods** — Emotional situations rather than plot structures. Cozy, Tense, Playful, Melancholic, Intimate, and Adventurous, each with specific scenarios like "Quiet Morning," "Late Night Confession," "Comfort After Nightmare," etc.
 

@@ -1,7 +1,7 @@
 import { getSettings, updateSettings } from './settings.js';
 import { loadTemplates, loadTwists, getTemplatePrompt, getTemplateDescription, 
          getTropeCategories, getTropesByCategory, getMoodCategories, getMoodSituations,
-         getTwistCategories } from './templates.js';
+         getTwistCategories, hasSwappedPrompt } from './templates.js';
 import { generateScenario, generateSummary } from './generator.js';
 import { WorldInfoSelector } from './worldinfo-selector.js';
 import { getUserAvatars, user_avatar } from '../../../../personas.js';
@@ -16,6 +16,7 @@ export class ScenarioCrafterModal {
             applyMode: 'new-chat',
             category: null,
             subcategory: null,
+            leadRole: 'char',
             customPrompt: '',
             generatedText: '',
             tone: getSettings().default_tone,
@@ -1088,10 +1089,15 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
 
         container.find('#sc-trope-subcategories').show();
         container.find('#sc-trope-description').hide();
+        // Clear any lead toggle from a previously-selected trope in the old category
+        container.find('#sc-lead-toggle').remove();
+        this.state.leadRole = 'char';
     }
 
     selectTrope(tropeName) {
         this.state.subcategory = tropeName;
+        // Reset lead role on every new trope selection so it never carries over stale state.
+        this.state.leadRole = 'char';
 
         const container = this.modal.find('#sc-scenario-options');
         const optionsContainer = container.find('#sc-trope-options button');
@@ -1103,6 +1109,46 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
 
         const descContainer = container.find('#sc-trope-description');
         descContainer.html(`<strong>${escapeHtml(tropeName)}</strong><br>${escapeHtml(description || prompt)}`).show();
+
+        this.renderLeadToggle(container, 'trope', this.state.category, tropeName);
+    }
+
+    // Renders the "Who leads?" toggle, but ONLY when the selected entry has a swapped variant.
+    // Presence of prompt_swapped is the single source of truth for showing this control.
+    renderLeadToggle(container, type, category, subcategory) {
+        // Remove any existing toggle first (e.g. when switching between tropes)
+        container.find('#sc-lead-toggle').remove();
+
+        if (!hasSwappedPrompt(type, category, subcategory)) {
+            return;
+        }
+
+        const context = SillyTavern.getContext();
+        const charName = this.state.selectedCharacter !== null && context.characters?.[this.state.selectedCharacter]
+            ? context.characters[this.state.selectedCharacter].name
+            : '{{char}}';
+        const userName = context.name1 || '{{user}}';
+
+        const toggle = $(`
+            <div id="sc-lead-toggle" class="scenariocrafter-lead-toggle">
+                <span class="scenariocrafter-lead-label">Who leads?</span>
+                <div class="scenariocrafter-lead-buttons">
+                    <button type="button" data-lead="char" class="active">${escapeHtml(charName)}</button>
+                    <button type="button" data-lead="user">${escapeHtml(userName)}</button>
+                </div>
+            </div>
+        `);
+
+        toggle.find('button').on('click', (e) => {
+            const lead = $(e.currentTarget).data('lead');
+            this.state.leadRole = lead;
+            toggle.find('button').removeClass('active');
+            $(e.currentTarget).addClass('active');
+            log('Lead role set to:', lead);
+        });
+
+        // Insert the toggle right after the description block
+        container.find('#sc-trope-description').after(toggle);
     }
 
     renderMoodOptions(container) {

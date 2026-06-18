@@ -162,7 +162,7 @@ async function buildGenerationMessages(state, settings, context) {
                 .replace(/\{\{user\}\}/g, userName);
             userPrompt += `Incorporate this scenario direction: ${processedCustom}`;
         } else if (state.category && state.subcategory) {
-            const templatePrompt = getTemplatePrompt(state.scenarioType, state.category, state.subcategory);
+            const templatePrompt = getTemplatePrompt(state.scenarioType, state.category, state.subcategory, state.leadRole === 'user');
             if (templatePrompt) {
                 const processedPrompt = templatePrompt
                     .replace(/\{\{char\}\}/g, charName)
@@ -179,7 +179,7 @@ async function buildGenerationMessages(state, settings, context) {
                 .replace(/\{\{user\}\}/g, userName);
             userPrompt += `The scenario should be based on this premise: ${processedCustom}`;
         } else if (state.category && state.subcategory) {
-            const templatePrompt = getTemplatePrompt(state.scenarioType, state.category, state.subcategory);
+            const templatePrompt = getTemplatePrompt(state.scenarioType, state.category, state.subcategory, state.leadRole === 'user');
             if (templatePrompt) {
                 const processedPrompt = templatePrompt
                     .replace(/\{\{char\}\}/g, charName)

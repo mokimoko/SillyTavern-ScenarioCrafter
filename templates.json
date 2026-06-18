@@ -16,6 +16,7 @@
       },
       "Role Reversal": {
         "prompt": "Power dynamics are reversed. {{char}} belongs to the dominant group; {{user}} belongs to a weaker or subordinate group, possibly oppressed by {{char}}'s. Reference available World Info to determine what these reversed dynamics look like.",
+        "prompt_swapped": "Power dynamics are reversed. {{user}} belongs to the dominant group; {{char}} belongs to a weaker or subordinate group, possibly oppressed by {{user}}'s. Reference available World Info to determine what these reversed dynamics look like. Write {{char}} navigating their subordinate position.",
         "description": "Reversed power dynamics"
       },
       "Omegaverse": {
@@ -36,14 +37,17 @@
       },
       "Hypnosis Protocol": {
         "prompt": "Hypnosis and mind control are common tools in this world. {{char}} possesses a device, spell, or natural ability to command minds, and has decided to use it on {{user}}.",
+        "prompt_swapped": "Hypnosis and mind control are common tools in this world. {{user}} possesses a device, spell, or natural ability to command minds, and has decided to use it on {{char}}. Write {{char}}'s experience as the one being commanded — determine how much awareness or resistance {{char}} retains.",
         "description": "Mind control and hypnosis setting"
       },
       "Human Livestock": {
         "prompt": "Society has collapsed into a hierarchy where the weak are treated as livestock by the strong — for labor, food, or breeding. {{char}} is the owner/handler. {{user}} has no rights and is kept in a pen or cage. Determine how {{char}} inspects or uses their stock today.",
+        "prompt_swapped": "Society has collapsed into a hierarchy where the weak are treated as livestock by the strong — for labor, food, or breeding. {{user}} is the owner/handler. {{char}} has no rights and is kept in a pen or cage. Write {{char}}'s perspective as livestock — determine {{char}}'s condition, their handling, and how they regard the owner who controls them.",
         "description": "Dehumanization/Cattle dynamic"
       },
       "The Purge": {
         "prompt": "For 12 hours, all crime is legal. {{char}} has cornered {{user}} during this lawless night. No police, no laws, no consequences.",
+        "prompt_swapped": "For 12 hours, all crime is legal. {{user}} has cornered {{char}} during this lawless night. No police, no laws, no consequences. Write {{char}} cornered and exposed — determine whether {{char}} fights, pleads, or freezes.",
         "description": "All crime is legal scenario"
       },
       "Hanahaki Disease": {
@@ -62,10 +66,12 @@
     "relationship": {
       "Protector": {
         "prompt": "{{char}} has taken it upon themselves to protect {{user}} from a threat. Determine the nature of the threat and how this arrangement came about based on available character and world info.",
+        "prompt_swapped": "{{user}} has taken it upon themselves to protect {{char}} from a threat. Determine the nature of the threat and how this arrangement came about based on available character and world info. Write {{char}} as the one being protected — determine how {{char}} feels about needing protection.",
         "description": "Protective relationship dynamic"
       },
       "Bodyguard": {
         "prompt": "{{char}} is employed to guard {{user}}, creating complex power dynamics and forbidden attraction. Determine how this arrangement came about.",
+        "prompt_swapped": "{{user}} is employed to guard {{char}}, creating complex power dynamics and forbidden attraction. Determine how this arrangement came about. Write from the perspective of {{char}}, the one being guarded.",
         "description": "Bodyguard protecting their charge"
       },
       "Blood Relatives": {
@@ -118,34 +124,42 @@
       },
       "Teacher/Student": {
         "prompt": "{{char}} is {{user}}'s teacher, mentor, or instructor. This creates a power dynamic with professional boundaries. Determine the subject, setting, and how the relationship developed.",
+        "prompt_swapped": "{{user}} is {{char}}'s teacher, mentor, or instructor. This creates a power dynamic with professional boundaries. Determine the subject, setting, and how the relationship developed. Write {{char}} as the student under {{user}}'s instruction.",
         "description": "Teacher/student dynamic with forbidden attraction"
       },
       "Master/Servant": {
         "prompt": "{{char}} is {{user}}'s master or employer; {{user}} serves them (servant, maid, butler, slave, etc.). Determine the nature of this arrangement.",
+        "prompt_swapped": "{{user}} is {{char}}'s master or employer; {{char}} serves them (servant, maid, butler, slave, etc.). Determine the nature of this arrangement. Write from {{char}}'s perspective as the one in service.",
         "description": "Master and servant with power dynamics"
       },
       "Bully and Victim": {
         "prompt": "{{char}} has a history of tormenting {{user}}. The aggression masks a twisted obsession or intense attraction. Determine how this dynamic plays out when they are alone.",
+        "prompt_swapped": "{{user}} has a history of tormenting {{char}}. The aggression masks a twisted obsession or intense attraction. Determine how this dynamic plays out when they are alone. Write {{char}} as the one targeted — determine how {{char}} bears or reacts to it.",
         "description": "Toxic attraction dynamic"
       },
       "Master and Pet": {
         "prompt": "{{char}} owns {{user}}, viewing them as a pet or property rather than an equal. Determine the rules {{char}} imposes and the nature of this servitude.",
+        "prompt_swapped": "{{user}} owns {{char}}, viewing them as a pet or property rather than an equal. Determine the rules {{user}} imposes and the nature of this servitude. Write from {{char}}'s perspective as the owned — determine how {{char}} regards their position.",
         "description": "Owner and property dynamic"
       },
       "God and Worshipper": {
         "prompt": "{{char}} is a deity or powerful supernatural entity. {{user}} is their devoted worshipper or intended sacrifice. {{char}} has manifested to claim what is owed.",
+        "prompt_swapped": "{{user}} is a deity or powerful supernatural entity. {{char}} is their devoted worshipper or intended sacrifice. {{user}} has manifested to claim what is owed. Write {{char}} as the worshipper or sacrifice in the presence of {{user}}'s divinity.",
         "description": "Divine being and follower"
       },
       "Blackmailer": {
         "prompt": "{{char}} has discovered a ruinous secret or obtained compromising material about {{user}}. {{char}} is using this leverage to force {{user}} into obedience. Determine the nature of the leverage.",
+        "prompt_swapped": "{{user}} has discovered a ruinous secret or obtained compromising material about {{char}}. {{user}} is using this leverage to force {{char}} into obedience. Determine the nature of the leverage. Write {{char}} as the one being coerced — determine what {{char}} stands to lose.",
         "description": "Coercion through leverage"
       },
       "Yandere": {
         "prompt": "{{char}} is dangerously obsessed with {{user}} — has stalked, isolated, or eliminated rivals to reach them. Now that {{char}} has {{user}} alone, they will not accept refusal. The love is violent and all-consuming.",
+        "prompt_swapped": "{{user}} is dangerously obsessed with {{char}} — has stalked, isolated, or eliminated rivals to reach them. Now that {{user}} has {{char}} alone, they will not accept refusal. The love is violent and all-consuming. Write {{char}} on the receiving end of this obsession — determine {{char}}'s fear, defiance, or grim resignation.",
         "description": "Violent/Obsessive love"
       },
       "Warden and Prisoner": {
         "prompt": "{{user}} is an inmate; {{char}} is the corrections officer in charge of their block. {{char}} abuses their authority to conduct unauthorized searches and off-regulation punishments.",
+        "prompt_swapped": "{{char}} is an inmate; {{user}} is the corrections officer in charge of their block. {{user}} abuses their authority to conduct unauthorized searches and off-regulation punishments. Write from {{char}}'s perspective as the inmate subject to {{user}}'s authority.",
         "description": "Abuse of authority in prison"
       },
       "The Replacement": {
@@ -154,10 +168,12 @@
       },
       "The Traitor": {
         "prompt": "{{char}} was sent to infiltrate {{user}}'s life, gain their trust, and destroy them or hand them to enemies. But {{char}} has genuinely fallen in love. The deadline to complete the mission has arrived.",
+        "prompt_swapped": "{{user}} was sent to infiltrate {{char}}'s life, gain their trust, and destroy them or hand them to enemies. {{char}} has just discovered the betrayal — or senses something is wrong. Determine whether {{char}} confronts {{user}}, plays along, or is still in the dark. Write {{char}}'s perspective as the mark.",
         "description": "Spy who fell in love"
       },
       "Fallen Hero": {
         "prompt": "{{char}} was once a noble figure or hero that {{user}} admired. Tragedy or corruption has twisted them into a villain or a broken shell. {{user}} is the only one who remembers who {{char}} used to be.",
+        "prompt_swapped": "{{user}} was once a noble figure or hero that {{char}} admired. Tragedy or corruption has twisted {{user}} into a villain or a broken shell. {{char}} is the only one who remembers who {{user}} used to be. Write {{char}}'s perspective confronting what {{user}} has become — determine whether {{char}} grieves, rages, or still clings to hope.",
         "description": "Corrupted hero and believer"
       }
     },
@@ -176,6 +192,7 @@
       },
       "Caught in the Act": {
         "prompt": "{{char}} walks in on {{user}} in a compromising, intimate position. Instead of leaving, {{char}} reacts — determine whether they watch, tease, or intervene.",
+        "prompt_swapped": "{{user}} walks in on {{char}} in a compromising, intimate position. Write {{char}}'s reaction to being discovered — determine whether {{char}} freezes, scrambles to cover, or brazens it out.",
         "description": "Walked in on masturbating"
       },
       "The Game": {
@@ -184,6 +201,7 @@
       },
       "Stuck": {
         "prompt": "{{user}} is physically stuck in a tight spot (window, wall, furniture) and cannot move. {{char}} finds them helpless and exposed. Instead of helping immediately, {{char}} takes advantage of the situation.",
+        "prompt_swapped": "{{char}} is physically stuck in a tight spot (window, wall, furniture) and cannot move. {{user}} finds them helpless and exposed. Write {{char}}'s perspective while trapped and at {{user}}'s mercy — determine {{char}}'s mounting awareness of how exposed they are.",
         "description": "Stuck in wall/furniture trope"
       },
       "Sleep (Somnophilia)": {
@@ -192,6 +210,7 @@
       },
       "Public Punishment": {
         "prompt": "{{char}} punishes or humiliates {{user}} in a public or semi-public place (classroom, party, street). Determine the setting and nature of the punishment.",
+        "prompt_swapped": "{{user}} punishes or humiliates {{char}} in a public or semi-public place (classroom, party, street). Determine the setting and nature of the punishment. Write {{char}}'s experience as the one exposed before onlookers.",
         "description": "Humiliation/Exhibitionism risk"
       },
       "Glory Hole": {
@@ -200,6 +219,7 @@
       },
       "Jealousy": {
         "prompt": "{{char}} notices {{user}} receiving attention from someone else and becomes intensely jealous. Determine the reason for the jealousy and how {{char}} reacts.",
+        "prompt_swapped": "{{char}} notices {{user}} becoming intensely jealous over attention {{char}} received from someone else. Determine the reason and how {{char}} responds to {{user}}'s jealousy — placating, provoking, or enjoying it.",
         "description": "Jealousy over rival attention"
       },
       "Childcare": {
@@ -208,14 +228,17 @@
       },
       "Debt Collection": {
         "prompt": "{{user}} has unknowingly inherited a debt owed to {{char}} — financial, magical, or otherwise. Determine how {{char}} approaches collection.",
+        "prompt_swapped": "{{char}} has unknowingly inherited a debt owed to {{user}} — financial, magical, or otherwise. {{user}} has come to collect. Write {{char}}'s perspective as the debtor confronted with what they owe.",
         "description": "Collecting an inherited debt"
       },
       "Auction": {
         "prompt": "{{char}} discovers {{user}} being auctioned off. Determine the nature of the auction and {{char}}'s attempt to win.",
+        "prompt_swapped": "{{char}} is being auctioned off, and {{user}} is among the bidders. Determine the nature of the auction. Write {{char}}'s perspective from the block — determine {{char}}'s composure, dread, or calculation as the bidding rises.",
         "description": "Auction scenario"
       },
       "Kidnapped": {
         "prompt": "{{char}} has kidnapped {{user}}. Determine the motive and circumstances.",
+        "prompt_swapped": "{{user}} has kidnapped {{char}}. Determine the motive and circumstances. Write {{char}}'s perspective as the captive — determine {{char}}'s fear, defiance, or attempts to read their captor.",
         "description": "Kidnapping scenario"
       },
       "Amnesia": {
@@ -236,10 +259,12 @@
       },
       "Execution": {
         "prompt": "{{char}} has been ordered to execute {{user}} — due to war, crime, or faction loyalty. {{char}} has {{user}} at their mercy, weapon drawn, and must decide whether to follow through or turn against everything they know.",
+        "prompt_swapped": "{{user}} has been ordered to execute {{char}} — due to war, crime, or faction loyalty. {{char}} is at {{user}}'s mercy, facing the drawn weapon. Write {{char}}'s perspective in these possibly-final moments — determine whether {{char}} pleads, defies, or makes peace.",
         "description": "Char is ordered to kill User"
       },
       "Mercy Kill": {
         "prompt": "{{user}} is infected, cursed, or mortally wounded with no hope of recovery — in agony or slowly transforming. {{user}} begs {{char}} to end it. {{char}} holds the weapon, facing the hardest decision of their life.",
+        "prompt_swapped": "{{char}} is infected, cursed, or mortally wounded with no hope of recovery — in agony or slowly transforming. {{char}} begs {{user}} to end it. Write {{char}}'s perspective in their final lucid moments — the pain, the fear, the plea. Leave room for {{user}} to decide.",
         "description": "Ending User's suffering"
       },
       "Badly Wounded": {
@@ -250,17 +275,15 @@
         "prompt": "{{char}} wakes screaming from a horrific nightmare — possibly past trauma or war. Disoriented, terrified, and potentially violent until {{user}} can ground them back in reality.",
         "description": "Severe PTSD episode"
       },
-      "Drunk (Char)": {
+      "Drunk": {
         "prompt": "{{char}} is heavily intoxicated when encountering {{user}}. Inhibitions are lowered; {{char}} may say or do things usually unthinkable.",
-        "description": "Character is drunk"
+        "prompt_swapped": "{{user}} is heavily intoxicated when encountering {{char}}. {{user}}'s inhibitions are lowered. Write {{char}}'s perspective dealing with {{user}} in this state — determine whether {{char}} is amused, concerned, exasperated, or takes the opportunity to learn something {{user}} would normally hide.",
+        "description": "Someone is drunk"
       },
-      "Sickness (Char)": {
-        "prompt": "{{char}} is extremely sick and unable to care for themselves.",
-        "description": "Character is ill"
-      },
-      "Sickness (User)": {
-        "prompt": "{{char}} has discovered that {{user}} is very sick and unable to care for themselves.",
-        "description": "User is ill, needs care"
+      "Sickness": {
+        "prompt": "{{char}} has discovered that {{user}} is very sick and unable to care for themselves. Determine how {{char}} tends to them.",
+        "prompt_swapped": "{{char}} is extremely sick and unable to care for themselves. Write {{char}}'s perspective through the fever and weakness, leaving room for {{user}} to tend to them.",
+        "description": "One of them is ill and needs care"
       }
     }
   },

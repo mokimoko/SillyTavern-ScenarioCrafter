@@ -1190,3 +1190,65 @@ body.scenariocrafter-modal-open {
         height: 92vh;
     }
 }
+
+/* ===========================
+   WHO LEADS? TOGGLE
+   Shown only for tropes that define a swapped variant.
+   =========================== */
+.scenariocrafter-lead-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 7px 9px;
+    background: var(--sc-bg-card);
+    border: 1px solid var(--sc-border);
+    border-radius: 3px;
+}
+
+.scenariocrafter-lead-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--sc-text);
+    opacity: 0.85;
+    white-space: nowrap;
+}
+
+.scenariocrafter-lead-buttons {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    justify-content: flex-end;
+}
+
+.scenariocrafter-lead-buttons button {
+    flex: 0 1 auto;
+    max-width: 48%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 4px 12px;
+    border: 1px solid var(--sc-border);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8em;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--sc-transition);
+}
+
+.scenariocrafter-lead-buttons button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    border-color: var(--sc-border-hover);
+}
+
+.scenariocrafter-lead-buttons button.active {
+    background: var(--sc-accent-bg);
+    border-color: var(--sc-accent-border);
+    color: var(--sc-accent);
+    font-weight: 500;
+}

@@ -78,6 +78,10 @@ if (typeof window.ScenarioCrafterCleanup === 'undefined') {
     window.ScenarioCrafterCleanup = cleanup;
 }
 
+// Public API — allows other extensions (e.g. UI Bedazzler side buttons)
+// to open the Scenario Crafter modal programmatically.
+window.ScenarioCrafter = { openModal };
+
 function registerSlashCommands() {
     SlashCommandParser.addCommandObject(SlashCommand.fromProps({
         name: 'scenario',
