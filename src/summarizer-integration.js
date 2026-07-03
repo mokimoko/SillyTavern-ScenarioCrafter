@@ -6,8 +6,7 @@
  * (no hard dependency — just reads the same JSON file).
  */
 import { getRequestHeaders } from '../../../../../script.js';
-
-const log = (...args) => console.log('[ScenarioCrafter Summarizer]', ...args);
+import { log, logError } from './utils.js';
 
 const ARCHIVE_FILE_URL = '/user/files/archive_summarizer.json';
 
@@ -54,7 +53,7 @@ async function loadArchiveFile() {
         }
 
         if (!response.ok) {
-            log('Failed to load archive file:', response.status);
+            logError('Failed to load archive file:', response.status);
             return null;
         }
 
@@ -63,7 +62,7 @@ async function loadArchiveFile() {
         cacheTimestamp = now;
         return data;
     } catch (error) {
-        log('Error loading archive file:', error.message);
+        logError('Error loading archive file:', error.message);
         return null;
     }
 }

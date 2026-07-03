@@ -1717,7 +1717,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     }
     
     destroy() {
-        console.log('[ScenarioCrafter] Destroying modal...');
+        log('Destroying modal...');
         
         // Remove document-level event listeners
         if (this._boundHandlers) {
@@ -1737,6 +1737,6 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         this._boundHandlers = null;
         this.modal = null;
         
-        console.log('[ScenarioCrafter] Modal destroyed');
+        log('Modal destroyed');
     }
 }

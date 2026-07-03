@@ -3,6 +3,7 @@ import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.j
 import { SlashCommandArgument, ARGUMENT_TYPE } from '../../../slash-commands/SlashCommandArgument.js';
 import { SlashCommandEnumValue, enumTypes } from '../../../slash-commands/SlashCommandEnumValue.js';
 import { eventSource, event_types } from '../../../../script.js';
+import { log, logError } from './src/utils.js';
 
 const MODULE_NAME = 'ScenarioCrafter';
 const extensionFolderPath = `scripts/extensions/third-party/SillyTavern-${MODULE_NAME}`;
@@ -21,10 +22,8 @@ async function initializeExtension() {
         // Import dependencies
         const [
             { initSettings },
-            { log },
         ] = await Promise.all([
             import('./src/settings.js'),
-            import('./src/utils.js'),
         ]);
         
         // Initialize settings
@@ -34,15 +33,15 @@ async function initializeExtension() {
         const { ScenarioCrafterModal } = await import('./src/modal.js');
         modal = new ScenarioCrafterModal();
         
-        console.log('[ScenarioCrafter] All components initialized');
+        log('All components initialized');
     } catch (error) {
-        console.error('[ScenarioCrafter] Failed to initialize extension:', error);
+        logError('Failed to initialize extension:', error);
         toastr.error('Failed to load Scenario Crafter', MODULE_NAME);
     }
 }
 
 function cleanup() {
-    console.log('[ScenarioCrafter] Cleaning up...');
+    log('Cleaning up...');
     
     isExtensionActive = false;
     
@@ -53,12 +52,12 @@ function cleanup() {
     
     $('#scenariocrafter_button').remove();
     
-    console.log('[ScenarioCrafter] Cleanup complete');
+    log('Cleanup complete');
 }
 
 jQuery(async () => {
     if (isExtensionActive) {
-        console.log('[ScenarioCrafter] Already initialized, skipping');
+        log('Already initialized, skipping');
         return;
     }
     
@@ -69,7 +68,7 @@ jQuery(async () => {
     
     eventSource.on(event_types.APP_READY, async () => {
         if (!isExtensionActive) return;
-        console.log('[ScenarioCrafter] APP_READY - initializing extension');
+        log('APP_READY - initializing extension');
         await initializeExtension();
     });
 });
@@ -181,7 +180,7 @@ function registerSlashCommands() {
                     }
                 }
             } catch (error) {
-                console.error('[ScenarioCrafter] Twist error:', error);
+                logError('Twist error:', error);
                 toastr.error('Failed to generate twist: ' + error.message, MODULE_NAME);
                 return 'Error: ' + error.message;
             }
@@ -294,7 +293,7 @@ function registerSlashCommands() {
                     }
                 }
             } catch (error) {
-                console.error('[ScenarioCrafter] Custom scenario error:', error);
+                logError('Custom scenario error:', error);
                 toastr.error('Failed to generate: ' + error.message, MODULE_NAME);
                 return 'Error: ' + error.message;
             }
@@ -375,7 +374,7 @@ function registerSlashCommands() {
 
                 return 'Usage: /scenario-list [all|tropes|moods|twists]';
             } catch (error) {
-                console.error('[ScenarioCrafter] List error:', error);
+                logError('List error:', error);
                 return 'Error loading templates';
             }
         },
@@ -426,7 +425,7 @@ function registerSlashCommands() {
                 toastr.success('Scenario injection cleared', MODULE_NAME);
                 return 'Injection cleared';
             } catch (error) {
-                console.error('[ScenarioCrafter] Clear error:', error);
+                logError('Clear error:', error);
                 toastr.error('Failed to clear injection', MODULE_NAME);
                 return 'Error: ' + error.message;
             }
@@ -449,7 +448,7 @@ function registerSlashCommands() {
         `,
     }));
     
-    console.log('[ScenarioCrafter] Slash commands registered');
+    log('Slash commands registered');
 }
 
 async function openModal() {
