@@ -1,24 +1,49 @@
 /* ================================================================
    SCENARIOCRAFTER - STYLES
-   Nebula Dark aesthetic: dark transparency, sharp corners, muted palette
-   Matches UI Bedazzler / Dynamic Events design language
+   Theme-adaptive: surfaces keep frosted tint, accents + text follow
+   the active SillyTavern theme via --SmartTheme* tokens (light OR dark).
+   Matches UI Bedazzler / Dynamic Events / Summarizer design language.
+   Prefix: sc-  (kept; vars redefined onto the theme-adaptive layer)
    ================================================================ */
 
-/* ===========================
-   CSS VARIABLES
-   =========================== */
-:root {
-    --sc-accent: rgba(151, 167, 198, 1);
-    --sc-accent-dim: rgba(151, 167, 198, 0.4);
-    --sc-accent-bg: rgba(100, 140, 220, 0.15);
-    --sc-accent-border: rgba(100, 140, 220, 0.25);
-    --sc-bg-card: rgba(255, 255, 255, 0.03);
+/* ── Theme-adaptive variable layer ────────────────────────
+   Self-contained copy so this extension needs no other extension
+   loaded. Scoped to ScenarioCrafter's top-level containers (NOT :root)
+   so it can't collide with other extensions' var blocks. The main modal
+   and the secondary popups are siblings, so all three are listed.
+   Keep in sync with UIBedazzler style.css --bd-* block if token
+   definitions change. Semantic colors (danger red, success green,
+   status blue) stay literal at their call sites.
+   ---------------------------------------------------------- */
+.scenariocrafter-modal,
+.scenariocrafter-popup,
+.scenariocrafter-wi-selector {
+    /* Surfaces — frosted theme tint */
+    --sc-bg-modal: var(--SmartThemeBlurTintColor, rgba(18, 18, 22, 0.97));
+    --sc-surface: color-mix(in srgb, var(--SmartThemeBodyColor, #fff) 3%, transparent);
+    --sc-surface-2: color-mix(in srgb, var(--SmartThemeBodyColor, #fff) 6%, transparent);
+    --sc-surface-hover: color-mix(in srgb, var(--SmartThemeBodyColor, #fff) 8%, transparent);
+    --sc-bg-card: var(--sc-surface);
+    /* Dark inset (inputs/output) — stays a dark scrim on both themes */
     --sc-bg-input: rgba(0, 0, 0, 0.25);
-    --sc-bg-modal: rgba(18, 18, 22, 0.97);
-    --sc-border: rgba(255, 255, 255, 0.08);
-    --sc-border-hover: rgba(255, 255, 255, 0.15);
-    --sc-text: rgba(207, 203, 197, 1);
-    --sc-text-muted: rgba(207, 203, 197, 0.5);
+
+    /* Borders */
+    --sc-border: color-mix(in srgb, var(--SmartThemeBodyColor, #fff) 8%, transparent);
+    --sc-border-hover: color-mix(in srgb, var(--SmartThemeBodyColor, #fff) 15%, transparent);
+
+    /* Text — follows the theme body color */
+    --sc-text: var(--SmartThemeBodyColor, rgba(207, 203, 197, 1));
+    --sc-text-strong: color-mix(in srgb, var(--SmartThemeBodyColor, #fff) 85%, transparent);
+    --sc-text-muted: color-mix(in srgb, var(--SmartThemeBodyColor, #cfcbc5) 55%, transparent);
+    --sc-text-faint: color-mix(in srgb, var(--SmartThemeBodyColor, #cfcbc5) 35%, transparent);
+
+    /* Accent — follows the theme quote color */
+    --sc-accent: var(--SmartThemeQuoteColor, rgba(151, 167, 198, 1));
+    --sc-accent-dim: color-mix(in srgb, var(--SmartThemeQuoteColor, #97a7c6) 40%, transparent);
+    --sc-accent-bg: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 15%, transparent);
+    --sc-accent-border: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 25%, transparent);
+    --sc-accent-text: color-mix(in srgb, var(--SmartThemeQuoteColor, #a0bef0) 85%, var(--SmartThemeBodyColor, #fff));
+
     --sc-transition: all 0.15s ease;
 }
 
@@ -87,7 +112,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--sc-border);
     flex-shrink: 0;
 }
 
@@ -97,7 +122,7 @@
     gap: 8px;
     font-size: 14px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--sc-text-strong);
     letter-spacing: 0.3px;
     margin: 0;
 }
@@ -110,7 +135,7 @@
 .scenariocrafter-close {
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--sc-text-faint);
     cursor: pointer;
     font-size: 16px;
     padding: 4px 6px;
@@ -119,7 +144,7 @@
 }
 
 .scenariocrafter-close:hover {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--sc-text-strong);
 }
 
 /* Modal Body Layout */
@@ -137,10 +162,10 @@
     flex-direction: column;
     gap: 0;
     overflow-y: auto;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid var(--sc-border);
     padding: 8px 12px;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+    scrollbar-color: var(--sc-border) transparent;
 }
 
 /* Right Pane */
@@ -157,7 +182,7 @@
    =========================== */
 .scenariocrafter-section {
     padding: 7px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--sc-border);
 }
 
 .scenariocrafter-section:last-of-type {
@@ -168,7 +193,7 @@
     margin: 0 0 5px 0;
     font-size: 0.72em;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--sc-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding-bottom: 0;
@@ -187,7 +212,7 @@
 .scenariocrafter-context-selectors label:not(.scenariocrafter-checkbox-label):not(.scenariocrafter-radio-label) {
     font-size: 0.76em;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--sc-text-muted);
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -197,11 +222,11 @@
 .scenariocrafter-input,
 .scenariocrafter-textarea,
 .scenariocrafter-input-sm {
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--sc-bg-input);
     border: 1px solid var(--sc-border);
     border-radius: 3px;
     padding: 4px 7px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--sc-text);
     font-size: 0.86em;
     font-family: inherit;
     width: 100%;
@@ -210,8 +235,8 @@
 }
 
 .scenariocrafter-select option {
-    background: rgb(25, 25, 30);
-    color: rgba(255, 255, 255, 0.8);
+    background: var(--SmartThemeBlurTintColor, rgb(25, 25, 30));
+    color: var(--sc-text);
 }
 
 .scenariocrafter-input-sm {
@@ -225,7 +250,7 @@
 .scenariocrafter-textarea:focus,
 .scenariocrafter-input-sm:focus {
     outline: none;
-    border-color: rgba(100, 140, 220, 0.35);
+    border-color: var(--sc-accent-border);
 }
 
 .scenariocrafter-textarea {
@@ -248,7 +273,7 @@
 .scenariocrafter-btn,
 .scenariocrafter-btn-sm {
     padding: 4px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--sc-border);
     border-radius: 3px;
     font-size: 0.82em;
     font-weight: 500;
@@ -259,8 +284,8 @@
     align-items: center;
     gap: 5px;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.65);
+    background: var(--sc-surface-2);
+    color: var(--sc-text-muted);
     white-space: nowrap;
 }
 
@@ -271,8 +296,8 @@
 
 .scenariocrafter-btn:hover:not(:disabled),
 .scenariocrafter-btn-sm:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.85);
+    background: var(--sc-surface-hover);
+    color: var(--sc-text-strong);
 }
 
 .scenariocrafter-btn:disabled,
@@ -285,23 +310,23 @@
 .scenariocrafter-btn-primary {
     background: var(--sc-accent-bg);
     border-color: var(--sc-accent-border);
-    color: rgba(160, 190, 240, 0.95);
+    color: var(--sc-accent-text);
 }
 
 .scenariocrafter-btn-primary:hover:not(:disabled) {
-    background: rgba(100, 140, 220, 0.25);
-    color: rgba(180, 205, 250, 1);
+    background: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 25%, transparent);
+    color: var(--sc-accent-text);
 }
 
 .scenariocrafter-btn-secondary {
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.6);
+    background: var(--sc-surface-2);
+    color: var(--sc-text-muted);
     border: 1px solid var(--sc-border);
 }
 
 .scenariocrafter-btn-secondary:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.8);
+    background: var(--sc-surface-hover);
+    color: var(--sc-text-strong);
 }
 
 .scenariocrafter-btn-success {
@@ -329,7 +354,7 @@
 .scenariocrafter-btn-icon {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.25);
+    color: var(--sc-text-faint);
     cursor: pointer;
     padding: 2px 5px;
     transition: color 0.15s;
@@ -340,7 +365,7 @@
 }
 
 .scenariocrafter-btn-icon:hover:not(:disabled) {
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--sc-text-muted);
 }
 
 .scenariocrafter-btn-icon:disabled {
@@ -362,7 +387,7 @@
 .scenariocrafter-type-buttons {
     display: flex;
     gap: 2px;
-    background: rgba(0, 0, 0, 0.15);
+    background: transparent;
     padding: 2px;
 }
 
@@ -371,7 +396,7 @@
     padding: 5px 3px;
     background: transparent;
     border: 1px solid transparent;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--sc-text-muted);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
     display: flex;
@@ -389,14 +414,14 @@
 }
 
 .scenariocrafter-type-btn:hover {
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.7);
+    background: var(--sc-surface);
+    color: var(--sc-text);
 }
 
 .scenariocrafter-type-btn.active {
-    background: rgba(100, 140, 220, 0.12);
-    color: rgba(160, 190, 240, 0.95);
-    border-color: rgba(100, 140, 220, 0.2);
+    background: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 12%, transparent);
+    color: var(--sc-accent-text);
+    border-color: var(--sc-accent-border);
 }
 
 .scenariocrafter-type-btn:disabled {
@@ -415,9 +440,9 @@
 
 .scenariocrafter-button-grid button {
     padding: 5px 6px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.65);
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-border);
+    color: var(--sc-text-muted);
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
     font-size: 0.78em;
@@ -428,14 +453,14 @@
 }
 
 .scenariocrafter-button-grid button:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: var(--sc-surface-hover);
+    border-color: var(--sc-border-hover);
 }
 
 .scenariocrafter-button-grid button.active {
-    background: rgba(100, 140, 220, 0.12);
-    border-color: rgba(100, 140, 220, 0.25);
-    color: rgba(160, 190, 240, 0.95);
+    background: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 12%, transparent);
+    border-color: var(--sc-accent-border);
+    color: var(--sc-accent-text);
 }
 
 /* ===========================
@@ -444,11 +469,11 @@
 .scenariocrafter-description {
     margin-top: 6px;
     padding: 6px 8px;
-    background: rgba(255, 255, 255, 0.02);
-    border-left: 2px solid rgba(100, 140, 220, 0.3);
+    background: var(--sc-surface);
+    border-left: 2px solid var(--sc-accent-dim);
     font-size: 0.78em;
     line-height: 1.45;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--sc-text-muted);
 }
 
 /* ===========================
@@ -463,38 +488,24 @@
     cursor: pointer !important;
     padding: 2px 0 !important;
     user-select: none !important;
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: var(--sc-text-muted) !important;
     font-size: 0.84em !important;
     margin: 0 !important;
 }
 
 .scenariocrafter-checkbox-label:hover,
 .scenariocrafter-radio-label:hover {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: var(--sc-text-strong) !important;
 }
 
 .scenariocrafter-checkbox-label input[type="checkbox"],
 .scenariocrafter-checkbox-label input[type="radio"],
 .scenariocrafter-radio-label input[type="checkbox"],
 .scenariocrafter-radio-label input[type="radio"] {
-    cursor: pointer !important;
-    width: 13px !important;
-    height: 13px !important;
-    min-width: 13px !important;
-    min-height: 13px !important;
-    accent-color: var(--sc-accent) !important;
-    flex-shrink: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: inline-block !important;
-    position: relative !important;
-    opacity: 1 !important;
-    z-index: 1 !important;
-}
-
-.scenariocrafter-radio-label input[type="radio"] {
-    -webkit-appearance: radio !important;
-    -moz-appearance: radio !important;
+    cursor: pointer;
+    accent-color: var(--sc-accent);
+    flex-shrink: 0;
+    margin: 0;
 }
 
 .scenariocrafter-checkbox-label > span,
@@ -515,7 +526,7 @@
     margin-top: 3px;
     margin-bottom: 3px;
     padding: 5px 8px;
-    border-left: 2px solid rgba(100, 140, 220, 0.25);
+    border-left: 2px solid var(--sc-accent-border);
     background: rgba(0, 0, 0, 0.1);
 }
 
@@ -527,7 +538,7 @@
     gap: 6px;
     justify-content: flex-end;
     padding: 6px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--sc-border);
     min-height: 24px;
     flex-shrink: 0;
 }
@@ -539,7 +550,7 @@
     overflow-y: auto;
     position: relative;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+    scrollbar-color: var(--sc-border) transparent;
 }
 
 .scenariocrafter-placeholder {
@@ -548,7 +559,7 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: rgba(255, 255, 255, 0.25);
+    color: var(--sc-text-faint);
     gap: 10px;
     text-align: center;
     font-size: 0.86em;
@@ -564,7 +575,7 @@
     padding: 0;
     font-size: 0.9em;
     line-height: 1.65;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--sc-text);
     height: 100%;
     width: 100%;
     font-family: inherit;
@@ -601,7 +612,7 @@
    APPLY SECTION
    =========================== */
 .scenariocrafter-apply-section {
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--sc-border);
     padding: 10px 12px;
     display: flex;
     flex-direction: column;
@@ -643,8 +654,8 @@
     position: relative;
     width: 90%;
     max-width: 580px;
-    background: rgba(24, 24, 30, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--sc-bg-modal);
+    border: 1px solid var(--sc-border);
     padding: 16px 20px;
     display: flex;
     flex-direction: column;
@@ -665,7 +676,7 @@
     margin: 0;
     font-size: 14px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--sc-text-strong);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -680,14 +691,14 @@
     display: flex;
     flex-direction: column;
     gap: 3px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--sc-text-muted);
     font-size: 0.84em;
 }
 
 .scenariocrafter-popup-content label > span:first-child {
     font-weight: 500;
     font-size: 0.8em;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--sc-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.3px;
 }
@@ -724,17 +735,17 @@
     flex-direction: column;
     gap: 6px;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+    scrollbar-color: var(--sc-border) transparent;
 }
 
 .scenariocrafter-wi-book {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--sc-border);
     overflow: hidden;
     transition: border-color 0.15s;
 }
 
 .scenariocrafter-wi-book:hover {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--sc-border-hover);
 }
 
 .scenariocrafter-wi-book-header {
@@ -742,15 +753,15 @@
     align-items: center;
     gap: 0.5em;
     padding: 7px 10px;
-    background: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    background: var(--sc-surface);
+    border-bottom: 1px solid var(--sc-border);
     cursor: pointer;
     transition: background 0.15s;
     user-select: none;
 }
 
 .scenariocrafter-wi-book-header:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--sc-surface-hover);
 }
 
 .scenariocrafter-wi-book-toggle {
@@ -763,13 +774,13 @@
 .scenariocrafter-wi-book-toggle i {
     transition: transform 0.15s;
     font-size: 0.76em;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--sc-text-faint);
 }
 
 .scenariocrafter-wi-book-header h3 {
     margin: 0;
     font-size: 0.86em;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--sc-text);
     flex: 1;
     font-weight: 500;
 }
@@ -794,7 +805,7 @@
     max-height: 320px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+    scrollbar-color: var(--sc-border) transparent;
 }
 
 .scenariocrafter-wi-entry {
@@ -802,15 +813,15 @@
     flex-direction: column;
     gap: 1px;
     padding: 4px 7px;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--sc-surface);
     border: 1px solid transparent;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
 }
 
 .scenariocrafter-wi-entry:hover {
-    background: rgba(100, 140, 220, 0.08);
-    border-color: rgba(100, 140, 220, 0.2);
+    background: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 8%, transparent);
+    border-color: var(--sc-accent-border);
 }
 
 .scenariocrafter-wi-entry-header {
@@ -840,13 +851,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--sc-text);
     max-width: 22ch;
 }
 
 .scenariocrafter-wi-entry-keys {
     font-size: 0.66em;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--sc-text-faint);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -856,7 +867,7 @@
 
 .scenariocrafter-wi-entry-content {
     font-size: 0.66em;
-    color: rgba(255, 255, 255, 0.25);
+    color: var(--sc-text-faint);
     font-style: italic;
     white-space: nowrap;
     overflow: hidden;
@@ -870,7 +881,7 @@
     justify-content: space-between;
     align-items: center;
     padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--sc-border);
 }
 
 .scenariocrafter-wi-footer > div {
@@ -902,16 +913,16 @@
 
 .scenariocrafter-prompt-header h3 {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--sc-text-strong);
     margin: 0 0 6px 0;
 }
 
 .scenariocrafter-prompt-info {
     padding: 5px 8px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-border);
     font-size: 0.8em;
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--sc-text-muted);
 }
 
 .scenariocrafter-prompt-messages {
@@ -922,18 +933,18 @@
     flex-direction: column;
     gap: 8px;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+    scrollbar-color: var(--sc-border) transparent;
 }
 
 .scenariocrafter-prompt-message {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--sc-border);
     overflow: hidden;
     flex-shrink: 0;
 }
 
 .scenariocrafter-prompt-role {
-    background: rgba(100, 140, 220, 0.12);
-    color: rgba(160, 190, 240, 0.9);
+    background: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 12%, transparent);
+    color: var(--sc-accent-text);
     padding: 5px 10px;
     font-weight: 600;
     font-size: 0.7em;
@@ -948,7 +959,7 @@
     line-height: 1.55;
     white-space: pre-wrap;
     word-wrap: break-word;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--sc-text-muted);
     background: rgba(0, 0, 0, 0.12);
 }
 
@@ -976,7 +987,7 @@
 .scenariocrafter-wi-books::-webkit-scrollbar-thumb,
 .scenariocrafter-prompt-messages::-webkit-scrollbar-thumb,
 .scenariocrafter-wi-entries::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--sc-border);
     border-radius: 10px;
 }
 
@@ -985,7 +996,7 @@
 .scenariocrafter-wi-books::-webkit-scrollbar-thumb:hover,
 .scenariocrafter-prompt-messages::-webkit-scrollbar-thumb:hover,
 .scenariocrafter-wi-entries::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--sc-border-hover);
 }
 
 /* ===========================
@@ -1019,14 +1030,14 @@ body.scenariocrafter-modal-open {
    =========================== */
 .scenariocrafter-verse-notice {
     padding: 4px 7px;
-    background: rgba(100, 140, 220, 0.08);
-    border: 1px solid rgba(100, 140, 220, 0.15);
+    background: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 8%, transparent);
+    border: 1px solid var(--sc-accent-border);
     font-size: 0.76em;
     margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 5px;
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--sc-text-muted);
 }
 
 /* ===========================
@@ -1039,23 +1050,23 @@ body.scenariocrafter-modal-open {
     max-height: 180px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+    scrollbar-color: var(--sc-border) transparent;
 }
 
 .comprehensive-summary-item {
     padding: 5px 7px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--sc-border);
     transition: border-color 0.15s;
 }
 
 .comprehensive-summary-item.selected {
-    border-color: rgba(100, 140, 220, 0.2);
-    background: rgba(100, 140, 220, 0.05);
+    border-color: var(--sc-accent-border);
+    background: color-mix(in srgb, var(--SmartThemeQuoteColor, #648cdc) 5%, transparent);
 }
 
 .comprehensive-summary-empty {
     font-size: 0.8em;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--sc-text-faint);
     font-style: italic;
     padding: 6px 0;
 }
@@ -1078,7 +1089,7 @@ body.scenariocrafter-modal-open {
 
 .summary-item-title {
     font-size: 0.82em;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--sc-text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1087,15 +1098,15 @@ body.scenariocrafter-modal-open {
 .summary-order-badge {
     font-size: 0.66em;
     padding: 1px 4px;
-    background: rgba(100, 140, 220, 0.15);
-    color: rgba(160, 190, 240, 0.8);
+    background: var(--sc-accent-bg);
+    color: var(--sc-accent-text);
     border-radius: 2px;
     flex-shrink: 0;
 }
 
 .summary-item-meta {
     font-size: 0.7em;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--sc-text-faint);
     margin-left: 18px;
     display: flex;
     gap: 6px;
@@ -1109,9 +1120,9 @@ body.scenariocrafter-modal-open {
 }
 
 .summary-item-controls button {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.4);
+    background: var(--sc-surface-2);
+    border: 1px solid var(--sc-border);
+    color: var(--sc-text-faint);
     cursor: pointer;
     padding: 2px 5px;
     font-size: 0.7em;
@@ -1119,7 +1130,7 @@ body.scenariocrafter-modal-open {
 }
 
 .summary-item-controls button:hover:not(:disabled) {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--sc-text);
 }
 
 .summary-item-controls button:disabled {
@@ -1136,10 +1147,10 @@ body.scenariocrafter-modal-open {
 .custom-summary-preview {
     padding: 5px 7px;
     margin-top: 3px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-border);
     font-size: 0.76em;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--sc-text-muted);
 }
 
 .custom-summary-preview-header {
@@ -1151,12 +1162,12 @@ body.scenariocrafter-modal-open {
 
 .custom-summary-preview-header strong {
     font-size: 0.9em;
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--sc-text);
 }
 
 .custom-summary-position {
     font-size: 0.8em;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--sc-text-faint);
 }
 
 .custom-summary-preview-text {
@@ -1166,7 +1177,7 @@ body.scenariocrafter-modal-open {
 .sc-comprehensive-info {
     display: block;
     font-size: 0.7em;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--sc-text-faint);
     margin-top: 4px;
 }
 
@@ -1182,7 +1193,7 @@ body.scenariocrafter-modal-open {
         width: 100%;
         max-height: 40vh;
         border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        border-bottom: 1px solid var(--sc-border);
     }
 
     .scenariocrafter-modal-content {
@@ -1232,8 +1243,8 @@ body.scenariocrafter-modal-open {
     padding: 4px 12px;
     border: 1px solid var(--sc-border);
     border-radius: 3px;
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.6);
+    background: var(--sc-surface-2);
+    color: var(--sc-text-muted);
     font-size: 0.8em;
     font-family: inherit;
     cursor: pointer;
@@ -1241,8 +1252,8 @@ body.scenariocrafter-modal-open {
 }
 
 .scenariocrafter-lead-buttons button:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.85);
+    background: var(--sc-surface-hover);
+    color: var(--sc-text-strong);
     border-color: var(--sc-border-hover);
 }
 
