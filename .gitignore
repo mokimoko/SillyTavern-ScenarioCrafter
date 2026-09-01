@@ -16,6 +16,10 @@ _tools/
 /*_TASKLIST.md
 /SPLIT_PLAN.md
 
+# Development-only tests
+/tests/
+*.test.*
+
 # Test output
 coverage/
 .nyc_output/
