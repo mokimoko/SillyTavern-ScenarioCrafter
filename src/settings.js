@@ -177,7 +177,13 @@ function createFullSettingsUI() {
         </div>
     `;
     
-    $('#extensions_settings2').append(settingsHtml);
+    const left = document.getElementById('extensions_settings');
+    const right = document.getElementById('extensions_settings2');
+    const target = left && right
+        ? (right.children.length > left.children.length ? left : right)
+        : (left || right);
+    if (!target) return;
+    $(target).append(settingsHtml);
     
     // Populate connection profiles
     populateConnectionProfiles();

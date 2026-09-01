@@ -991,11 +991,11 @@
     border-radius: 10px;
 }
 
-.scenariocrafter-config::-webkit-scrollbar-thumb:hover,
-.scenariocrafter-output-content::-webkit-scrollbar-thumb:hover,
-.scenariocrafter-wi-books::-webkit-scrollbar-thumb:hover,
-.scenariocrafter-prompt-messages::-webkit-scrollbar-thumb:hover,
-.scenariocrafter-wi-entries::-webkit-scrollbar-thumb:hover {
+.scenariocrafter-config:hover::-webkit-scrollbar-thumb,
+.scenariocrafter-output-content:hover::-webkit-scrollbar-thumb,
+.scenariocrafter-wi-books:hover::-webkit-scrollbar-thumb,
+.scenariocrafter-prompt-messages:hover::-webkit-scrollbar-thumb,
+.scenariocrafter-wi-entries:hover::-webkit-scrollbar-thumb {
     background: var(--sc-border-hover);
 }
 
