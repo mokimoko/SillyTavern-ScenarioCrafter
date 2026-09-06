@@ -8,6 +8,7 @@ import { getUserAvatars, user_avatar } from '../../../../personas.js';
 import { log, logError, escapeHtml, buildDisplayName, countNames } from './utils.js';
 import { power_user } from '../../../../power-user.js';
 import { isSummarizerInstalled, getComprehensiveSummaries, invalidateArchiveCache } from './summarizer-integration.js';
+import { makeModalDraggable } from './draggableModal.js';
 
 export class ScenarioCrafterModal {
     constructor() {
@@ -35,6 +36,7 @@ export class ScenarioCrafterModal {
         this.lastPrompt = null;
         this.cachedElements = null;
         this.isInitialized = false;
+        this.draggableModal = null;
 
         this.includeComprehensive = false;
         this.selectedComprehensiveSummaries = [];
@@ -369,6 +371,14 @@ export class ScenarioCrafterModal {
         $('body').append(modal);
         this.modal = modal;
         this.cacheElements();
+        this.draggableModal = makeModalDraggable(
+            modal.find('.scenariocrafter-modal-content')[0],
+            modal.find('.scenariocrafter-header')[0],
+            {
+                prefix: 'scenariocrafter-modal',
+                visibleClass: 'scenariocrafter-modal-visible',
+            },
+        );
     }
 
     cacheElements() {
@@ -1681,6 +1691,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
             this.modal[0].offsetHeight; // Force reflow
             this.modal.addClass('scenariocrafter-modal-visible');
             $('body').addClass('scenariocrafter-modal-open');
+            requestAnimationFrame(() => this.draggableModal?.clamp());
             
             // Attach event listeners FIRST
             this.attachEventListeners();
@@ -1699,6 +1710,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
             this.modal[0].offsetHeight; // Force reflow
             this.modal.addClass('scenariocrafter-modal-visible');
             $('body').addClass('scenariocrafter-modal-open');
+            requestAnimationFrame(() => this.draggableModal?.clamp());
             
             // Update controls based on current chat state
             this.updateChatDependentControls();
@@ -1718,6 +1730,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     
     destroy() {
         log('Destroying modal...');
+        this.draggableModal?.destroy();
         
         // Remove document-level event listeners
         if (this._boundHandlers) {
@@ -1735,6 +1748,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         // Clear references
         this.cachedElements = null;
         this._boundHandlers = null;
+        this.draggableModal = null;
         this.modal = null;
         
         log('Modal destroyed');

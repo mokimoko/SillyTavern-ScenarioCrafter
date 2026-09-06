@@ -83,10 +83,12 @@
 }
 
 .scenariocrafter-modal-content {
+    --scenariocrafter-modal-drag-x: 0px;
+    --scenariocrafter-modal-drag-y: 0px;
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.95);
+    transform: translate(calc(-50% + var(--scenariocrafter-modal-drag-x)), calc(-50% + var(--scenariocrafter-modal-drag-y))) scale(0.95);
     z-index: 2;
     width: min(1020px, 94vw);
     height: min(86vh, 760px);
@@ -102,9 +104,10 @@
 
 .scenariocrafter-modal-visible .scenariocrafter-modal-content {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(calc(-50% + var(--scenariocrafter-modal-drag-x)), calc(-50% + var(--scenariocrafter-modal-drag-y))) scale(1);
     pointer-events: auto;
 }
+.scenariocrafter-modal-content.scenariocrafter-modal-dragging { transition: none; }
 
 /* Modal Header */
 .scenariocrafter-header {
@@ -114,7 +117,11 @@
     padding: 10px 14px;
     border-bottom: 1px solid var(--sc-border);
     flex-shrink: 0;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
 }
+.scenariocrafter-modal-dragging .scenariocrafter-header { cursor: grabbing; }
 
 .scenariocrafter-title {
     display: flex;

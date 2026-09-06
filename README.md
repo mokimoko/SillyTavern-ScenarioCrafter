@@ -57,7 +57,7 @@ Use SillyTavern's built-in extension installer:
 1. Open **Extensions** → **Install Extension**
 2. Paste this URL:
    ```
-   https://github.com/mokimoko/SillyTavern-ScenarioSprites
+   https://github.com/mokimoko/SillyTavern-ScenarioCrafter
    ```
 3. Click **Install** and reload if prompted
 
