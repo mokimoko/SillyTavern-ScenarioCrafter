@@ -74,3 +74,12 @@ Use SillyTavern's built-in extension installer:
 - `/scenario-custom [prompt]` — Generate and apply a custom scenario
 - `/scenario-list [type]` — List available templates (all, tropes, moods, twists)
 - `/scenario-clear` — Remove the scenario note injection
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
