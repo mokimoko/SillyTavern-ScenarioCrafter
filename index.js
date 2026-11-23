@@ -4,9 +4,12 @@ import { SlashCommandArgument, ARGUMENT_TYPE } from '../../../slash-commands/Sla
 import { SlashCommandEnumValue, enumTypes } from '../../../slash-commands/SlashCommandEnumValue.js';
 import { eventSource, event_types } from '../../../../script.js';
 import { log, logError } from './src/utils.js';
+import { restoreScenarioNote, setScenarioNote } from './src/scenario-application.js';
 
 const MODULE_NAME = 'ScenarioCrafter';
 const extensionFolderPath = `scripts/extensions/third-party/SillyTavern-${MODULE_NAME}`;
+
+const restoreCurrentScenarioNote = () => restoreScenarioNote();
 
 let modal = null;
 let isExtensionActive = false;
@@ -31,8 +34,9 @@ async function initializeExtension() {
         
         // Import and create modal
         const { ScenarioCrafterModal } = await import('./src/modal.js');
-        modal = new ScenarioCrafterModal();
+        if (!modal) modal = new ScenarioCrafterModal();
         
+        restoreScenarioNote();
         log('All components initialized');
     } catch (error) {
         logError('Failed to initialize extension:', error);
@@ -50,6 +54,7 @@ function cleanup() {
         modal = null;
     }
     
+    eventSource.removeListener(event_types.CHAT_CHANGED, restoreCurrentScenarioNote);
     $('#scenariocrafter_button').remove();
     
     log('Cleanup complete');
@@ -65,6 +70,7 @@ jQuery(async () => {
     
     addUI();
     registerSlashCommands();
+    eventSource.on(event_types.CHAT_CHANGED, restoreCurrentScenarioNote);
     
     eventSource.on(event_types.APP_READY, async () => {
         if (!isExtensionActive) return;
@@ -112,76 +118,16 @@ function registerSlashCommands() {
     SlashCommandParser.addCommandObject(SlashCommand.fromProps({
         name: 'scenario-twist',
         callback: async (args, category) => {
-            
-            if (!category) {
-                return 'Usage: /scenario-twist [wholesome|dramatic|spicy|meta|chaos]';
-            }
-
-            const context = SillyTavern.getContext();
-            if (!context.chat || context.chat.length === 0) {
-                toastr.error('No active chat to apply twist', MODULE_NAME);
-                return 'Error: No active chat';
-            }
-
+            if (!category?.trim()) return 'Usage: /scenario-twist [your category here]';
             try {
-                const { generateScenario } = await import('./src/generator.js');
-                const { getSettings } = await import('./src/settings.js');
-                const { getTwistCategories } = await import('./src/templates.js');
-                
-                const validCategories = getTwistCategories();
-                if (!validCategories.includes(category.toLowerCase())) {
-                    return `Invalid category. Available: ${validCategories.join(', ')}`;
-                }
-
-                const settings = getSettings();
-                const state = {
-                    scenarioType: 'twist',
-                    category: category.toLowerCase(),
-                    applyMode: 'append',
-                    tone: settings.default_tone,
-                    selectedCharacter: context.characterId,
-                    selectedPersona: null,
-                    includeHistory: true,
-                    historyRange: 15,
-                    includeWorldInfo: false,
-                };
-
-                // Handle connection profile switching
-                let originalProfile = null;
-                if (settings.profileId) {
-                    const profilesActive = $('#sys-settings-button').find('#connection_profiles').length > 0;
-                    
-                    if (profilesActive) {
-                        const currentResult = await context.executeSlashCommandsWithOptions('/profile-get');
-                        originalProfile = currentResult.pipe;
-                        
-                        if (originalProfile !== settings.profileId) {
-                            await context.executeSlashCommandsWithOptions(`/profile-set ${settings.profileId}`);
-                            await new Promise(resolve => setTimeout(resolve, 1500));
-                        }
-                    }
-                }
-
-                toastr.info('Generating plot twist...', MODULE_NAME);
-                let result;
-                try {
-                    result = await generateScenario(state);
-
-                    const char = context.characters[context.characterId];
-                    const charName = char?.name || 'Character';
-                    await context.executeSlashCommandsWithOptions(`/sendas name="${charName}" ${result.text}`);
-
-                    toastr.success(`Applied twist: ${result.twistApplied}`, MODULE_NAME);
-                    return result.text;
-                } finally {
-                    if (originalProfile && settings.profileId && originalProfile !== settings.profileId) {
-                        await context.executeSlashCommandsWithOptions(`/profile-set ${originalProfile}`);
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                }
+                const { runQuickScenario } = await import('./src/quick-scenario.js');
+                toastr.info('Generating scenario...', MODULE_NAME);
+                const result = await runQuickScenario('twist', category);
+                toastr.success('Scenario applied!', MODULE_NAME);
+                return result.text;
             } catch (error) {
-                logError('Twist error:', error);
-                toastr.error('Failed to generate twist: ' + error.message, MODULE_NAME);
+                logError('Scenario command failed:', error);
+                toastr.error(error.message, MODULE_NAME);
                 return 'Error: ' + error.message;
             }
         },
@@ -223,78 +169,16 @@ function registerSlashCommands() {
     SlashCommandParser.addCommandObject(SlashCommand.fromProps({
         name: 'scenario-custom',
         callback: async (args, prompt) => {
-            
-            if (!prompt) {
-                return 'Usage: /scenario-custom [your prompt here]';
-            }
-
-            const context = SillyTavern.getContext();
-
+            if (!prompt?.trim()) return 'Usage: /scenario-custom [your prompt here]';
             try {
-                const { generateScenario } = await import('./src/generator.js');
-                const { getSettings } = await import('./src/settings.js');
-
-                const settings = getSettings();
-                const state = {
-                    scenarioType: 'custom',
-                    customPrompt: prompt,
-                    applyMode: settings.apply_mode,
-                    tone: settings.default_tone,
-                    selectedCharacter: context.characterId,
-                    selectedPersona: null,
-                    includeHistory: settings.include_chat_history,
-                    historyRange: settings.history_range,
-                    includeWorldInfo: settings.include_world_info,
-                    worldInfoMode: settings.world_info_mode,
-                    enabledBooks: { ...settings.enabled_world_books },
-                    selectedEntries: { ...settings.selected_entries },
-                };
-
-                // Handle connection profile switching
-                let originalProfile = null;
-                if (settings.profileId) {
-                    const profilesActive = $('#sys-settings-button').find('#connection_profiles').length > 0;
-                    
-                    if (profilesActive) {
-                        const currentResult = await context.executeSlashCommandsWithOptions('/profile-get');
-                        originalProfile = currentResult.pipe;
-                        
-                        if (originalProfile !== settings.profileId) {
-                            await context.executeSlashCommandsWithOptions(`/profile-set ${settings.profileId}`);
-                            await new Promise(resolve => setTimeout(resolve, 1500));
-                        }
-                    }
-                }
-
-                toastr.info('Generating custom scenario...', MODULE_NAME);
-                let result;
-                try {
-                    result = await generateScenario(state);
-
-                    if (state.applyMode === 'new-chat') {
-                        await context.selectCharacterById(state.selectedCharacter);
-                        await new Promise(resolve => setTimeout(resolve, 300));
-                        await context.executeSlashCommandsWithOptions('/newchat');
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        await context.executeSlashCommandsWithOptions('/del 1');
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-
-                    const char = context.characters[state.selectedCharacter];
-                    const charName = char?.name || 'Character';
-                    await context.executeSlashCommandsWithOptions(`/sendas name="${charName}" ${result.text}`);
-
-                    toastr.success('Custom scenario applied!', MODULE_NAME);
-                    return result.text;
-                } finally {
-                    if (originalProfile && settings.profileId && originalProfile !== settings.profileId) {
-                        await context.executeSlashCommandsWithOptions(`/profile-set ${originalProfile}`);
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                }
+                const { runQuickScenario } = await import('./src/quick-scenario.js');
+                toastr.info('Generating scenario...', MODULE_NAME);
+                const result = await runQuickScenario('custom', prompt);
+                toastr.success('Scenario applied!', MODULE_NAME);
+                return result.text;
             } catch (error) {
-                logError('Custom scenario error:', error);
-                toastr.error('Failed to generate: ' + error.message, MODULE_NAME);
+                logError('Scenario command failed:', error);
+                toastr.error(error.message, MODULE_NAME);
                 return 'Error: ' + error.message;
             }
         },
@@ -418,9 +302,7 @@ function registerSlashCommands() {
             
             try {
                 const context = SillyTavern.getContext();
-                const { extension_prompt_types } = await import('../../../../../script.js');
-                
-                context.setExtensionPrompt('scenariocrafter_inject', '', extension_prompt_types.IN_CHAT, 0, false);
+                await setScenarioNote('', 0, context);
                 
                 toastr.success('Scenario injection cleared', MODULE_NAME);
                 return 'Injection cleared';
@@ -452,11 +334,16 @@ function registerSlashCommands() {
 }
 
 async function openModal() {
-    if (!modal) {
-        const { ScenarioCrafterModal } = await import('./src/modal.js');
-        modal = new ScenarioCrafterModal();
+    try {
+        if (!modal) {
+            const { ScenarioCrafterModal } = await import('./src/modal.js');
+            if (!modal) modal = new ScenarioCrafterModal();
+        }
+        await modal.show();
+    } catch (error) {
+        logError('Could not open Scenario Crafter:', error);
+        toastr.error('Could not open Scenario Crafter. Please try again.', MODULE_NAME);
     }
-    modal.show();
 }
 
 function addUI() {

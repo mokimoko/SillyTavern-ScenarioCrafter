@@ -1,4 +1,5 @@
 import { saveSettingsDebounced } from '../../../../../script.js';
+import { escapeHtml } from './utils.js';
 
 const SETTINGS_KEY = 'scenariocrafter_settings';
 
@@ -67,7 +68,7 @@ function createFullSettingsUI() {
                             <span>Base Style Prompt</span>
                             <small class="notes">Instructions for how the AI should write scenarios. Use {{char}} and {{user}} placeholders.</small>
                         </label>
-                        <textarea class="text_pole" id="sc-settings-style-prompt" rows="8">${currentSettings.base_style_prompt}</textarea>
+                        <textarea class="text_pole" id="sc-settings-style-prompt" rows="8">${escapeHtml(currentSettings.base_style_prompt)}</textarea>
                     </div>
                     
                     <hr>
@@ -214,7 +215,7 @@ function populateConnectionProfiles() {
             
             profiles.forEach(profileName => {
                 const isSelected = profileName === currentSettings.profileId;
-                const option = $(`<option value="${profileName}">${profileName}</option>`);
+                const option = $('<option></option>').val(profileName).text(profileName);
                 if (isSelected) {
                     option.prop('selected', true);
                 }
@@ -267,7 +268,7 @@ function setupSettingsListeners() {
     
     // History range
     $('#sc-settings-history-range').on('change', function() {
-        currentSettings.history_range = parseInt($(this).val()) || 5;
+        currentSettings.history_range = Math.min(50, Math.max(1, Number($(this).val()) || 5));
         saveSettings();
     });
     
@@ -292,7 +293,8 @@ function setupSettingsListeners() {
     
     // Injection depth
     $('#sc-settings-injection-depth').on('change', function() {
-        currentSettings.injection_depth = parseInt($(this).val()) || 10;
+        const value = Number($(this).val());
+        currentSettings.injection_depth = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 10;
         saveSettings();
     });
     

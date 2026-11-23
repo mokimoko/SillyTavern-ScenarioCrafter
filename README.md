@@ -28,6 +28,8 @@ Enjoy :) -moki
 - **Append to Current** — Adds the scenario as a new message in your current chat.
 - **Rewrite Last Message** — Replaces the character's most recent response with a rewritten version incorporating your scenario direction.
 
+Rewrites keep the original response as a swipe. If the chat or scenario choices change after generation, generate again before applying the draft.
+
 ## Context Options
 
 **Chat History** — Include recent messages so the generator understands the existing dynamic. Configurable message count (default 5).
@@ -35,6 +37,8 @@ Enjoy :) -moki
 **World Info** — Pull in lorebook entries. Three modes: Triggered Entries (keyword-matched), All Enabled Books, or Selected Entries (manual picker).
 
 **Character & Persona** — Choose which character and persona to generate for, even if they're different from your current chat.
+
+Collections over 200 characters or personas get a search box. Search by name, title, or filename to narrow the dropdown; your current selection stays available while you search.
 
 **Connection Profile** — Use a separate API connection/preset for generation if you want a different model or settings.
 

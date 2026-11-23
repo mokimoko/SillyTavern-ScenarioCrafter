@@ -216,6 +216,23 @@
     gap: 4px;
 }
 
+.scenariocrafter-context-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.scenariocrafter-context-hint {
+    color: var(--sc-text-muted);
+    font-size: 0.9em;
+    line-height: 1.35;
+}
+
+.scenariocrafter-context-search[hidden],
+.scenariocrafter-context-hint[hidden] {
+    display: none;
+}
+
 .scenariocrafter-context-selectors label:not(.scenariocrafter-checkbox-label):not(.scenariocrafter-radio-label) {
     font-size: 0.76em;
     font-weight: 500;

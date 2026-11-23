@@ -3,26 +3,21 @@ import { getSettings } from './settings.js';
 import { getTemplatePrompt, getRandomTwist, getToneModifier } from './templates.js';
 import { log, logError, worldBookCache } from './utils.js';
 import { power_user } from '../../../../power-user.js';
+import { findRewriteMessage } from './scenario-target.js';
+import { getAvailableWorldBooks } from './worldbook-discovery.js';
 
 function replaceNamesInText(text, activeCharName, activeUserName, targetCharName, targetUserName) {
     // Replace {{char}}/{{user}} macros with active names, then swap to target names
     if (!text) return text;
     
-    let result = text;
-    
-    // First replace any {{char}}/{{user}} macros with active names
-    result = result.replace(/\{\{char\}\}/gi, activeCharName);
-    result = result.replace(/\{\{user\}\}/gi, activeUserName);
-    
-    // Then swap active names to target names (if different)
-    if (activeCharName !== targetCharName) {
-        result = result.replace(new RegExp(`\\b${activeCharName}\\b`, 'g'), targetCharName);
-    }
-    if (activeUserName !== targetUserName) {
-        result = result.replace(new RegExp(`\\b${activeUserName}\\b`, 'g'), targetUserName);
-    }
-    
-    return result;
+    const names = new Map([[activeCharName, targetCharName], [activeUserName, targetUserName]]);
+    const patterns = [...names.keys()].filter(Boolean).sort((a, b) => b.length - a.length)
+        .map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const literalNames = patterns.length ? `|(?<![\\p{L}\\p{N}_])(?:${patterns.join('|')})(?![\\p{L}\\p{N}_])` : '';
+    const pattern = new RegExp(`\\{\\{(?:[cC][hH][aA][rR]|[uU][sS][eE][rR])\\}\\}${literalNames}`, 'gu');
+    // Resolve macros and names together so neither replacements nor macro tokens cascade.
+    return text.replace(pattern, name => /^\{\{char\}\}$/i.test(name) ? targetCharName
+        : /^\{\{user\}\}$/i.test(name) ? targetUserName : names.get(name));
 }
 
 function prepareTextWithNames(text, selectedCharName, selectedUserName) {
@@ -30,8 +25,8 @@ function prepareTextWithNames(text, selectedCharName, selectedUserName) {
     if (!text) return text;
     
     let result = text;
-    result = result.replace(/\{\{char\}\}/gi, selectedCharName);
-    result = result.replace(/\{\{user\}\}/gi, selectedUserName);
+    result = result.replace(/\{\{char\}\}/gi, () => selectedCharName);
+    result = result.replace(/\{\{user\}\}/gi, () => selectedUserName);
     
     return result;
 }
@@ -58,7 +53,7 @@ async function buildGenerationMessages(state, settings, context) {
         if (!context.chat || context.chat.length === 0) {
             throw new Error('No chat history available to rewrite');
         }
-        lastMessage = context.chat[context.chat.length - 1];
+        lastMessage = findRewriteMessage(state, context).message;
     }
 
     // ── Build system prompt (all context) ──────────────────────────────────
@@ -137,8 +132,8 @@ async function buildGenerationMessages(state, settings, context) {
 
     // 5. Style guidelines + tone (context, not instruction)
     let stylePrompt = settings.base_style_prompt
-        .replace(/\{\{char\}\}/g, charName)
-        .replace(/\{\{user\}\}/g, userName);
+        .replace(/\{\{char\}\}/g, () => charName)
+        .replace(/\{\{user\}\}/g, () => userName);
     
     let styleSection = `Style Guidelines:\n${stylePrompt}`;
     const toneModifier = getToneModifier(state.tone);
@@ -158,15 +153,15 @@ async function buildGenerationMessages(state, settings, context) {
         
         if (state.scenarioType === 'custom' && state.customPrompt) {
             const processedCustom = state.customPrompt
-                .replace(/\{\{char\}\}/g, charName)
-                .replace(/\{\{user\}\}/g, userName);
+                .replace(/\{\{char\}\}/g, () => charName)
+                .replace(/\{\{user\}\}/g, () => userName);
             userPrompt += `Incorporate this scenario direction: ${processedCustom}`;
         } else if (state.category && state.subcategory) {
             const templatePrompt = getTemplatePrompt(state.scenarioType, state.category, state.subcategory, state.leadRole === 'user');
             if (templatePrompt) {
                 const processedPrompt = templatePrompt
-                    .replace(/\{\{char\}\}/g, charName)
-                    .replace(/\{\{user\}\}/g, userName);
+                    .replace(/\{\{char\}\}/g, () => charName)
+                    .replace(/\{\{user\}\}/g, () => userName);
                 userPrompt += `Apply this scenario approach: ${processedPrompt}`;
             }
         }
@@ -175,15 +170,15 @@ async function buildGenerationMessages(state, settings, context) {
 
         if (state.scenarioType === 'custom' && state.customPrompt) {
             const processedCustom = state.customPrompt
-                .replace(/\{\{char\}\}/g, charName)
-                .replace(/\{\{user\}\}/g, userName);
+                .replace(/\{\{char\}\}/g, () => charName)
+                .replace(/\{\{user\}\}/g, () => userName);
             userPrompt += `The scenario should be based on this premise: ${processedCustom}`;
         } else if (state.category && state.subcategory) {
             const templatePrompt = getTemplatePrompt(state.scenarioType, state.category, state.subcategory, state.leadRole === 'user');
             if (templatePrompt) {
                 const processedPrompt = templatePrompt
-                    .replace(/\{\{char\}\}/g, charName)
-                    .replace(/\{\{user\}\}/g, userName);
+                    .replace(/\{\{char\}\}/g, () => charName)
+                    .replace(/\{\{user\}\}/g, () => userName);
                 userPrompt += processedPrompt;
             }
         }
@@ -198,8 +193,7 @@ async function buildGenerationMessages(state, settings, context) {
     return { systemPrompt, userPrompt, displayMessages };
 }
 
-export async function generateScenario(state) {
-    const context = SillyTavern.getContext();
+export async function generateScenario(state, context = SillyTavern.getContext()) {
     const settings = getSettings();
     
     log('Generating scenario with state:', {
@@ -229,6 +223,7 @@ export async function generateScenario(state) {
         }
 
         const finalText = cleanResponse(response);
+        if (!finalText.trim()) throw new Error('Empty scenario after removing response preamble');
 
         return {
             text: finalText,
@@ -242,128 +237,17 @@ export async function generateScenario(state) {
 }
 
 async function generateTwist(state, settings, context) {
-    // Validate we have a chat
-    if (!context.chat || context.chat.length === 0) {
-        throw new Error('No active chat to apply twist to');
-    }
-
-    if (!state.category) {
-        throw new Error('No twist category selected');
-    }
-
-    // Get a random twist from the selected category
+    if (!context.chat?.length) throw new Error('No active chat to apply twist to');
     const selectedTwist = getRandomTwist(state.category);
-    if (!selectedTwist) {
-        throw new Error(`No twists found for category: ${state.category}`);
-    }
-
-    log('Selected twist:', selectedTwist);
-
-    // Get character and persona info
-    const charInfo = getCharacterInfo(state, context);
-    if (!charInfo) {
-        throw new Error('No character selected');
-    }
-
-    const charName = charInfo.name;
-    const userName = getPersonaName(state, context);
-
-    // Check if we're in rewrite mode
-    const isRewrite = state.applyMode === 'rewrite-last';
-    let lastMessage = null;
-    
-    if (isRewrite) {
-        lastMessage = context.chat[context.chat.length - 1];
-    }
-
-    // Build system prompt with twist - use selected names
-    let systemPrompt = `Continuing a roleplay between ${charName} and ${userName}.\n\n`;
-
-    if (charInfo.description) {
-        systemPrompt += `Character Description: ${prepareTextWithNames(charInfo.description, charName, userName)}\n`;
-    }
-    if (charInfo.personality) {
-        systemPrompt += `Personality: ${prepareTextWithNames(charInfo.personality, charName, userName)}\n`;
-    }
-    if (charInfo.scenario) {
-        systemPrompt += `Scenario: ${prepareTextWithNames(charInfo.scenario, charName, userName)}\n`;
-    }
-    if (charInfo.exampleMessages) {
-        systemPrompt += `Example Dialogue: ${prepareTextWithNames(charInfo.exampleMessages, charName, userName)}\n`;
-    }
-
-    const personaInfo = getPersonaInfo(state, context);
-    if (personaInfo) {
-        systemPrompt += `\nUser Persona (${userName}): ${prepareTextWithNames(personaInfo, charName, userName)}\n`;
-    }
-
-    // Get recent history (last 15 messages)
-    const historyLength = Math.min(15, context.chat.length);
-    const history = context.chat.slice(-historyLength);
-    const activeCharName = context.characters[context.characterId]?.name || charName;
-    const activeUserName = context.name1 || userName;
-
-    const historyText = history.map(m => {
-        const speakerName = m.is_user ? userName : charName;
-        const convertedMessage = replaceNamesInText(m.mes, activeCharName, activeUserName, charName, userName);
-        return `${speakerName}: ${convertedMessage}`;
-    }).join('\n\n');
-
-    systemPrompt += `\nRecent Chat History:\n${historyText}\n`;
-    systemPrompt += `\nA sudden plot twist occurs: ${selectedTwist}\n`;
-
-    if (isRewrite) {
-        systemPrompt += `\nRewrite ${charName}'s most recent response to incorporate this twist naturally. Keep the core scenario but weave in this development.`;
-    } else {
-        systemPrompt += `\nContinue as ${charName}, incorporating this plot twist to drive the scene in a new direction.`;
-    }
-
-    // Add style guidelines - use selected names
-    let stylePrompt = settings.base_style_prompt
-        .replace(/\{\{char\}\}/g, charName)
-        .replace(/\{\{user\}\}/g, userName);
-    
-    systemPrompt += `\n\nStyle Guidelines:\n${stylePrompt}`;
-
-    // Add tone if set
-    const toneModifier = getToneModifier(state.tone);
-    if (toneModifier) {
-        systemPrompt += `\n\nTone: ${toneModifier}`;
-    }
-
-    systemPrompt += `\n\nOutput the scenario text only. No preamble, no meta-commentary, no explanations. Do not reference or explain the twist — just write the scene.\nDo not write for ${userName}. ${userName}'s actions, dialogue, thoughts, and reactions are off-limits.`;
-
-    const userPrompt = isRewrite 
-        ? 'Rewrite your last response with the twist.' 
-        : 'Continue the scene with the twist.';
-
-    const displayMessages = [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-    ];
-
-    try {
-        const response = await generateRaw({
-            prompt: userPrompt,
-            systemPrompt: systemPrompt,
-        });
-
-        if (!response || !response.trim()) {
-            throw new Error('Empty response from API');
-        }
-
-        const finalText = cleanResponse(response);
-
-        return {
-            text: finalText,
-            prompt: displayMessages,
-            twistApplied: selectedTwist
-        };
-
-    } catch (error) {
-        logError('Twist generation error:', error);
-        throw new Error(error.message || 'Failed to generate twist');
-    }
+    if (!selectedTwist) throw new Error('Select a valid plot twist category.');
+    const prompts = await buildGenerationMessages({ ...state, scenarioType: 'custom',
+        customPrompt: `Continue the scene, naturally incorporating this plot twist: ${selectedTwist}. Do not explain the twist.` }, settings, context);
+    const userPrompt = prompts.userPrompt.replace('Write a new roleplay scenario/greeting', 'Continue the current roleplay scene');
+    const response = await generateRaw({ prompt: userPrompt, systemPrompt: prompts.systemPrompt });
+    const text = cleanResponse(response || '');
+    if (!text.trim()) throw new Error('Empty response from API');
+    return { text, twistApplied: selectedTwist,
+        prompt: [{ role: 'system', content: prompts.systemPrompt }, { role: 'user', content: userPrompt }] };
 }
 
 function getCharacterInfo(state, context) {
@@ -412,6 +296,7 @@ function getCharacterInfo(state, context) {
 }
 
 function getPersonaInfo(state, context) {
+    if (Object.hasOwn(state, 'personaDescription')) return state.personaDescription;
     // If a specific persona is selected (not empty string)
     if (state.selectedPersona && state.selectedPersona !== '' && power_user?.persona_descriptions) {
         const description = power_user.persona_descriptions[state.selectedPersona]?.description || '';
@@ -429,6 +314,7 @@ function getPersonaInfo(state, context) {
 }
 
 function getPersonaName(state, context) {
+    if (Object.hasOwn(state, 'personaName')) return state.personaName;
     // If specific persona selected (not empty string)
     if (state.selectedPersona && state.selectedPersona !== '' && power_user?.personas) {
         const personaName = power_user.personas[state.selectedPersona];
@@ -444,7 +330,7 @@ function getPersonaName(state, context) {
 function getChatHistory(state, context) {
     if (!context.chat || context.chat.length === 0) return [];
 
-    const range = Math.min(state.historyRange, context.chat.length);
+    const range = Math.min(Math.max(1, Number(state.historyRange) || 5), 50, context.chat.length);
     const start = Math.max(0, context.chat.length - range);
 
     return context.chat.slice(start).map(m => ({
@@ -462,12 +348,7 @@ async function getWorldInfo(state, context) {
     }
 
     // Get enabled world books from settings
-    const enabledBooks = Object.entries(state.enabledBooks || {})
-        .filter(([_, enabled]) => enabled)
-        .map(([name, _]) => name);
-    
-    // If no books enabled in settings, check if any are active in the UI
-    let bookNames = enabledBooks.length > 0 ? enabledBooks : getAvailableWorldBooks();
+    const bookNames = getAvailableWorldBooks(state, context);
     
     if (bookNames.length === 0) {
         log('No world books enabled');
@@ -495,7 +376,7 @@ async function getSelectedWorldInfo(state, context, bookNames) {
     const entries = [];
     
     for (const bookName of bookNames) {
-        if (!state.selectedEntries[bookName]) continue;
+        if (!state.selectedEntries?.[bookName]) continue;
         
         try {
             const bookData = await loadWorldBook(bookName, context);
@@ -589,8 +470,8 @@ async function getTriggeredWorldInfo(state, context, bookNames) {
                 }
                 
                 // Check if any key matches
-                const matches = keys.some(key => {
-                    const keyLower = key.toLowerCase();
+                const matches = entry.constant || keys.some(key => {
+                    const keyLower = String(key).toLowerCase();
                     return lowerTrigger.includes(keyLower);
                 });
                 
@@ -647,20 +528,6 @@ async function loadWorldBook(bookName, context) {
     }
 }
 
-// Get available world books from the UI
-function getAvailableWorldBooks() {
-    const books = [];
-    
-    $('#world_info option:selected').each(function() {
-        const bookName = $(this).text().trim();
-        if (bookName && bookName !== 'slot') {
-            books.push(bookName);
-        }
-    });
-    
-    log('Found world books from UI:', books);
-    return books;
-}
 
 function cleanResponse(text) {
     let cleaned = text.trim();

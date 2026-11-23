@@ -2,19 +2,24 @@ import { getSettings, updateSettings } from './settings.js';
 import { loadTemplates, loadTwists, getTemplatePrompt, getTemplateDescription, 
          getTropeCategories, getTropesByCategory, getMoodCategories, getMoodSituations,
          getTwistCategories, hasSwappedPrompt } from './templates.js';
-import { generateScenario, generateSummary } from './generator.js';
+import { generateScenarioDraft } from './generation-workflow.js';
+import { applyScenarioDraft } from './scenario-application.js';
+import { assertScenarioTarget } from './scenario-target.js';
+import { cloneSelectedEntries } from './worldbook-discovery.js';
+import { manageDialog } from './dialog-accessibility.js';
 import { WorldInfoSelector } from './worldinfo-selector.js';
+import { ContextSelector } from './context-selector.js';
 import { getUserAvatars, user_avatar } from '../../../../personas.js';
-import { log, logError, escapeHtml, buildDisplayName, countNames } from './utils.js';
+import { log, logError, escapeHtml } from './utils.js';
 import { power_user } from '../../../../power-user.js';
-import { isSummarizerInstalled, getComprehensiveSummaries, invalidateArchiveCache } from './summarizer-integration.js';
+import { isSummarizerInstalled, getComprehensiveSummaries, loadComprehensiveSummary, invalidateArchiveCache } from './summarizer-integration.js';
 import { makeModalDraggable } from './draggableModal.js';
 
 export class ScenarioCrafterModal {
     constructor() {
         this.state = {
             scenarioType: 'trope',
-            applyMode: 'new-chat',
+            applyMode: getSettings().apply_mode,
             category: null,
             subcategory: null,
             leadRole: 'char',
@@ -29,13 +34,20 @@ export class ScenarioCrafterModal {
             includeWorldInfo: getSettings().include_world_info,
             worldInfoMode: getSettings().world_info_mode,
             enabledBooks: { ...getSettings().enabled_world_books },
-            selectedEntries: { ...getSettings().selected_entries },
+            selectedEntries: cloneSelectedEntries(getSettings().selected_entries),
         };
         
         this.isGenerating = false;
+        this.isApplying = false;
+        this.generationVersion = 0;
+        this.generatedResult = null;
+        this.defaultSettings = getSettings();
         this.lastPrompt = null;
         this.cachedElements = null;
         this.isInitialized = false;
+        this._initializationPromise = null;
+        this._initializationController = null;
+        this._destroyed = false;
         this.draggableModal = null;
 
         this.includeComprehensive = false;
@@ -49,29 +61,65 @@ export class ScenarioCrafterModal {
         this.createModal();
     }
 
-    async loadInitialData() {
-        try {
-            // Load templates and twists
-            await Promise.all([loadTemplates(), loadTwists()]);
-            
-            // Populate UI elements
-            this.populateCharacters();
-            this.populateToneSelector();
-            
-            // Defer non-critical loading
-            requestAnimationFrame(() => {
-                this.populateConnectionProfiles();
-                this.updateChatDependentControls();
-                this.renderScenarioOptions();
-                this.setInitialCheckboxStates();
-            });
-            
-            // Load personas asynchronously (they're slow)
-            this.populatePersonas();
-        } catch (error) {
-            logError('Failed to load initial data:', error);
-            toastr.error('Failed to initialize Scenario Crafter', 'Error');
-        }
+    async loadInitialData(signal) {
+        if (signal.aborted) return false;
+        const [templates, twists] = await Promise.all([loadTemplates(), loadTwists()]);
+        if (signal.aborted) return false;
+        if (!templates || !twists) throw new Error('Could not load scenario templates.');
+        const ready = await Promise.all([
+            this.populateCharacters(signal), this.populatePersonas(signal), this.populateConnectionProfiles(signal),
+        ]);
+        if (signal.aborted || ready.includes(false)) return false;
+        this.populateToneSelector();
+        this.updateChatDependentControls();
+        this.renderScenarioOptions();
+        this.setInitialCheckboxStates();
+        return true;
+    }
+
+    initialize() {
+        if (this._initializationPromise) return this._initializationPromise;
+        const controller = new AbortController();
+        this._initializationController = controller;
+        this.modal.attr('aria-busy', 'true');
+        this.cachedElements.generateBtn.prop('disabled', true).text('Loading choices…');
+        this._initializationPromise = Promise.resolve().then(async () => {
+            let timer;
+            let onAbort;
+            try {
+                if (controller.signal.aborted) return;
+                const interrupted = new Promise((_, reject) => {
+                    onAbort = () => reject(new Error('Loading cancelled.'));
+                    controller.signal.addEventListener('abort', onAbort, { once: true });
+                    timer = setTimeout(() => reject(new Error('Loading took too long. Please retry.')), 30_000);
+                });
+                const ready = await Promise.race([this.loadInitialData(controller.signal), interrupted]);
+                if (controller.signal.aborted) return;
+                if (!ready) throw new Error('Choices changed while loading. Please retry.');
+                this.isInitialized = true;
+                this.cachedElements.outputContent.html('<div class="scenariocrafter-placeholder"><i class="fa-solid fa-wand-magic-sparkles fa-3x"></i><p>Configure options and click Generate</p></div>');
+                this.cachedElements.generateBtn.prop('disabled', false)
+                    .html('<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Scenario');
+            } catch (error) {
+                if (controller.signal.aborted || this._initializationController !== controller) return;
+                controller.abort();
+                this.characterSelector.cancel();
+                this.personaSelector.cancel();
+                logError('Failed to initialize modal:', error);
+                toastr.error('Could not load Scenario Crafter. Use Retry loading to try again.', 'Scenario Crafter');
+                this.cachedElements.outputContent.html('<div class="scenariocrafter-placeholder"><p>Could not load Scenario Crafter. Try again, or close and reopen the panel.</p></div>');
+                this.cachedElements.generateBtn.prop('disabled', false).text('Retry loading');
+            } finally {
+                clearTimeout(timer);
+                if (onAbort) controller.signal.removeEventListener('abort', onAbort);
+                if (this._initializationController === controller) {
+                    this._initializationController = null;
+                    this._initializationPromise = null;
+                    this.modal?.attr('aria-busy', 'false');
+                }
+            }
+        });
+        return this._initializationPromise;
     }
 
     updateChatDependentControls() {
@@ -88,11 +136,11 @@ export class ScenarioCrafterModal {
         });
         
         // Sync character dropdown to active chat's character
-        if (hasActiveChat && context.characterId !== undefined && context.characterId !== null) {
+        if (!this.generatedResult && !this.isGenerating && hasActiveChat && context.characterId !== undefined && context.characterId !== null) {
             const charId = parseInt(context.characterId);
             if (!isNaN(charId) && charId >= 0 && charId < (context.characters?.length || 0)) {
                 this.state.selectedCharacter = charId;
-                this.cachedElements.characterSelect.val(charId);
+                this.characterSelector.setValue(charId);
                 log('Synced active character to index:', charId);
             }
         }
@@ -148,7 +196,8 @@ export class ScenarioCrafterModal {
         this.cachedElements.historyRange.val(this.state.historyRange);
         this.cachedElements.includeWorldInfo.prop('checked', this.state.includeWorldInfo);
         this.modal.find(`input[name="sc-wi-mode"][value="${this.state.worldInfoMode}"]`).prop('checked', true);
-        this.cachedElements.addInjection.prop('checked', true);
+        this.cachedElements.addInjection.prop('checked', getSettings().add_scenario_injection);
+        this.cachedElements.applyModeSelect.val(this.state.applyMode);
         this.cachedElements.historyRangeContainer.toggle(this.state.includeHistory);
         this.cachedElements.worldInfoOptions.toggle(this.state.includeWorldInfo);
         this.cachedElements.selectEntries.toggle(this.state.worldInfoMode === 'selected');
@@ -180,7 +229,7 @@ export class ScenarioCrafterModal {
                             <i class="fa-solid fa-wand-magic-sparkles"></i>
                             <span>Scenario Crafter</span>
                         </div>
-                        <button class="scenariocrafter-close">
+                        <button class="scenariocrafter-close" aria-label="Close Scenario Crafter">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -191,14 +240,14 @@ export class ScenarioCrafterModal {
                             <div class="scenariocrafter-section">
                                 <h3 class="scenariocrafter-section-title">Active Context</h3>
                                 <div class="scenariocrafter-context-selectors">
-                                    <label>
-                                        <span>Character</span>
+                                    <div class="scenariocrafter-context-field">
+                                        <label for="sc-character-select">Character</label>
                                         <select class="scenariocrafter-select" id="sc-character-select"></select>
-                                    </label>
-                                    <label>
-                                        <span>Persona</span>
+                                    </div>
+                                    <div class="scenariocrafter-context-field">
+                                        <label for="sc-persona-select">Persona</label>
                                         <select class="scenariocrafter-select" id="sc-persona-select"></select>
-                                    </label>
+                                    </div>
                                     <label>
                                         <span>Connection Profile</span>
                                         <select class="scenariocrafter-select" id="sc-profile-select"></select>
@@ -308,7 +357,7 @@ export class ScenarioCrafterModal {
                                                 <input type="checkbox" id="sc-use-custom-summary">
                                                 <span>Custom Summary</span>
                                             </label>
-                                            <button class="scenariocrafter-btn-icon" id="sc-edit-custom-summary" style="display:none;">
+                                            <button class="scenariocrafter-btn-icon" id="sc-edit-custom-summary" aria-label="Edit custom summary" style="display:none;">
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
                                         </div>
@@ -371,6 +420,25 @@ export class ScenarioCrafterModal {
         $('body').append(modal);
         this.modal = modal;
         this.cacheElements();
+        this.characterSelector = new ContextSelector(this.cachedElements.characterSelect[0], 'characters');
+        this.personaSelector = new ContextSelector(this.cachedElements.personaSelect[0], 'personas');
+        this.onChatChanged = () => {
+            if (this.isApplying) return;
+            this.invalidateResult();
+            this._summaryLoadId = (this._summaryLoadId || 0) + 1;
+            this.availableComprehensiveSummaries = [];
+            this.selectedComprehensiveSummaries = [];
+            this._charactersDirty = true;
+            if (this.isInitialized && this.modal.is(':visible')) {
+                this.populateCharacters().then(ready => {
+                    if (!ready || this._destroyed) return;
+                    this.updateChatDependentControls();
+                    if (this.includeComprehensive) this.loadAvailableComprehensiveSummaries();
+                }).catch(error => logError('Could not refresh characters:', error));
+            }
+        };
+        const context = SillyTavern.getContext();
+        context.eventSource.on(context.event_types.CHAT_CHANGED, this.onChatChanged);
         this.draggableModal = makeModalDraggable(
             modal.find('.scenariocrafter-modal-content')[0],
             modal.find('.scenariocrafter-header')[0],
@@ -404,165 +472,62 @@ export class ScenarioCrafterModal {
         };
     }
 
-    populateCharacters() {
+    async populateCharacters(signal) {
+        if (signal?.aborted || this._destroyed) return false;
+        this._charactersDirty = true;
+        this.cachedElements.generateBtn.prop('disabled', true);
         const context = SillyTavern.getContext();
-        const select = this.cachedElements.characterSelect;
-        select.empty();
-
-        if (!context.characters || context.characters.length === 0) {
-            select.append('<option value="">No characters loaded</option>');
-            this.state.selectedCharacter = null;
-            return;
-        }
-
-        let characters = context.characters;
-
-        // Use utility function for duplicate handling
-        const nameCounts = countNames(characters, char => char.name || 'Unknown');
-
-        characters.forEach((char, index) => {
-            const name = char.name || 'Unknown';
-            const avatar = char.avatar || '';
-            
-            const displayName = buildDisplayName(name, avatar, null, nameCounts);
-            
-            const option = $(`<option value="${index}">${escapeHtml(displayName)}</option>`);
-            select.append(option);
-        });
-
-        // Set active character as selected (only if chat is loaded)
-        let activeCharIndex = null;
-        if (context.chatId !== undefined && context.characterId !== undefined && context.characterId !== null) {
-            activeCharIndex = context.characterId;
-        } else if (characters.length > 0) {
-            // Default to first character
-            activeCharIndex = 0;
-        }
-
-        this.state.selectedCharacter = activeCharIndex;
-        if (activeCharIndex !== null) {
-            select.val(activeCharIndex);
-        }
-
-        log('Set active character to index:', activeCharIndex);
-    }
-
-    async populatePersonas() {
-        const context = SillyTavern.getContext();
-        const select = this.cachedElements.personaSelect;
-        select.empty();
-        
-        // Get current persona avatar
-        const currentPersonaAvatar = user_avatar;
-        
-        // Get all available personas
+        const characters = context.characters || [];
+        const active = context.chatId !== undefined && characters[context.characterId]
+            ? context.characterId : null;
+        const pending = this.characterSelector.setItems(characters, (character, index) => character && ({
+            value: index, name: character.name, avatar: character.avatar,
+        }), active, signal);
+        const version = this.characterSelector.version;
         try {
-            const userAvatars = await getUserAvatars(false);
-            
-            if (userAvatars.length === 0) {
-                log('No personas found');
-                return;
+            const ready = await pending;
+            if (!ready || version !== this.characterSelector.version || signal?.aborted || this._destroyed) return false;
+            this.state.selectedCharacter = this.characterSelector.selectedValue === ''
+                ? null : Number(this.characterSelector.selectedValue);
+            this._charactersDirty = false;
+            return true;
+        } finally {
+            if (version === this.characterSelector.version && !this._destroyed) {
+                this.cachedElements.generateBtn.prop('disabled', !this.isInitialized || this._charactersDirty || this.isGenerating || this.isApplying);
             }
-            
-            let personas = userAvatars.map(avatar => ({
-                name: power_user.personas[avatar] || avatar,
-                avatar: avatar,
-                title: power_user.persona_descriptions?.[avatar]?.title || '',
-                filename: avatar
-            }));
-
-            // If active persona is NOT in the list, add it to the top
-            const activePersonaInList = personas.some(p => p.avatar === currentPersonaAvatar);
-            if (!activePersonaInList) {
-                const activePersonaData = userAvatars.find(avatar => avatar === currentPersonaAvatar);
-                if (activePersonaData) {
-                    personas.unshift({
-                        name: power_user.personas[activePersonaData] || activePersonaData,
-                        avatar: activePersonaData,
-                        title: power_user.persona_descriptions?.[activePersonaData]?.title || '',
-                        filename: activePersonaData
-                    });
-                }
-            }
-            
-            // Check for duplicate names
-            const nameCounts = {};
-            personas.forEach(persona => {
-                nameCounts[persona.name] = (nameCounts[persona.name] || 0) + 1;
-            });
-            
-            // Build display names
-            const processedPersonas = personas.map(persona => {
-                // Always show title if available
-                if (persona.title) {
-                    return {
-                        ...persona,
-                        displayName: `${persona.name} (${persona.title})`
-                    };
-                }
-                
-                // If there are duplicates and no title, use filename
-                if (nameCounts[persona.name] > 1) {
-                    return {
-                        ...persona,
-                        displayName: `${persona.name} (${persona.filename})`
-                    };
-                }
-                
-                // Just the name
-                return {
-                    ...persona,
-                    displayName: persona.name
-                };
-            });
-            
-            // Add to dropdown with selected state
-            processedPersonas.forEach(persona => {
-                const isSelected = persona.avatar === currentPersonaAvatar;
-                select.append(`<option value="${persona.avatar}" ${isSelected ? 'selected' : ''}>${escapeHtml(persona.displayName)}</option>`);
-            });
-            
-            // Set selected persona state
-            if (this.state.selectedPersona === null) {
-                this.state.selectedPersona = currentPersonaAvatar;
-            }
-            
-            log('Populated personas:', processedPersonas.length);
-        } catch (error) {
-            logError('Error loading personas:', error);
         }
     }
 
-    async populateConnectionProfiles() {
+    async populatePersonas(signal) {
+        const avatars = await getUserAvatars(false);
+        if (signal?.aborted || this._destroyed) return false;
+        if (!Array.isArray(avatars)) throw new Error('Could not load personas.');
+        const pending = this.personaSelector.setItems(avatars, avatar => ({
+            value: avatar, name: power_user.personas?.[avatar] || avatar, avatar,
+            title: power_user.persona_descriptions?.[avatar]?.title,
+        }), this.state.selectedPersona ?? user_avatar, signal);
+        const version = this.personaSelector.version;
+        const ready = await pending;
+        if (!ready || version !== this.personaSelector.version || signal?.aborted || this._destroyed) return false;
+        this.state.selectedPersona = this.personaSelector.selectedValue || user_avatar;
+        return ready;
+    }
+
+    async populateConnectionProfiles(signal) {
+        if (signal?.aborted || this._destroyed) return false;
         const context = SillyTavern.getContext();
         const select = this.cachedElements.profileSelect;
-        select.empty();
-
-        select.append('<option value="">Default Connection</option>');
-
-        // Check if connection profiles extension is active
-        if ($('#sys-settings-button').find('#connection_profiles').length === 0) {
-            log('Connection profiles extension not active');
-            return;
-        }
-
-        try {
-            const result = await context.executeSlashCommandsWithOptions('/profile-list');
-            const profiles = JSON.parse(result.pipe);
-            
-            profiles.forEach(profileName => {
-                const isSelected = profileName === this.state.connectionProfile;
-                const option = $(`<option value="${profileName}">${escapeHtml(profileName)}</option>`);
-                if (isSelected) {
-                    option.prop('selected', true);
-                }
-                select.append(option);
-            });
-            
-            log('Populated connection profiles:', profiles.length);
-        } catch (error) {
-            logError('Failed to load connection profiles:', error);
-        }
+        select.empty().append(new Option('Default Connection', ''));
+        if ($('#sys-settings-button').find('#connection_profiles').length === 0) return true;
+        const result = await context.executeSlashCommandsWithOptions('/profile-list');
+        if (signal?.aborted || this._destroyed) return false;
+        const profiles = JSON.parse(result.pipe);
+        if (!Array.isArray(profiles)) throw new Error('Could not load connection profiles.');
+        const fragment = document.createDocumentFragment();
+        for (const name of profiles) fragment.append(new Option(name, name));
+        select[0].append(fragment);
+        select.val(this.state.connectionProfile);
+        return true;
     }
 
     async loadAvailableComprehensiveSummaries() {
@@ -571,6 +536,7 @@ export class ScenarioCrafterModal {
             return;
         }
         
+        const loadId = this._summaryLoadId = (this._summaryLoadId || 0) + 1;
         const listContainer = this.modal.find('#sc-comprehensive-list');
         listContainer.html('<div class="comprehensive-summary-empty">Loading...</div>');
         
@@ -586,30 +552,30 @@ export class ScenarioCrafterModal {
             
             // Load summaries, optionally filtered by character
             const summaries = await getComprehensiveSummaries(
-                charName ? { characterName: charName } : {}
+                selectedChar ? { characterName: charName, characterAvatar: selectedChar.avatar } : {}
             );
             
+            if (loadId !== this._summaryLoadId) return;
             if (summaries.length === 0) {
                 listContainer.html('<div class="comprehensive-summary-empty">No summaries available</div>');
                 this.availableComprehensiveSummaries = [];
+                this.selectedComprehensiveSummaries = [];
+                this.updateComprehensiveInfo();
                 return;
             }
             
-            this.availableComprehensiveSummaries = summaries.map(s => ({
-                uid: s.chatFilename,       // Use chatFilename as unique ID
-                chatFilename: s.chatFilename,
-                displayName: s.displayName,
-                content: s.content,
-                quotes: s.quotes,
-                lastGenerated: s.lastGenerated,
-                characterName: s.characterName,
-            }));
+            this.availableComprehensiveSummaries = summaries;
+            const availableIds = new Set(summaries.map(summary => summary.uid));
+            this.selectedComprehensiveSummaries = this.selectedComprehensiveSummaries
+                .filter(summary => availableIds.has(summary.uid));
+            this.renumberSelectedSummaries();
             
             this.renderComprehensiveSummaryList();
             
             log('Found', this.availableComprehensiveSummaries.length, 'comprehensive summaries');
             
         } catch (error) {
+            if (loadId !== this._summaryLoadId) return;
             logError('Failed to load comprehensive summaries:', error);
             listContainer.html('<div class="comprehensive-summary-empty">Error loading summaries</div>');
         }
@@ -636,10 +602,10 @@ export class ScenarioCrafterModal {
             const dateStr = summary.lastGenerated 
                 ? new Date(summary.lastGenerated).toLocaleDateString() 
                 : '';
-            const quoteCount = summary.quotes?.length || 0;
+            const quoteCount = Array.isArray(summary.quotes) ? summary.quotes.length : null;
             
             const item = $(`
-                <div class="comprehensive-summary-item ${isSelected ? 'selected' : ''}" data-uid="${summary.uid}">
+                <div class="comprehensive-summary-item ${isSelected ? 'selected' : ''}" data-uid="${escapeHtml(summary.uid)}">
                     <div class="summary-item-header">
                         <label class="summary-item-checkbox">
                             <input type="checkbox" ${isSelected ? 'checked' : ''}>
@@ -649,14 +615,14 @@ export class ScenarioCrafterModal {
                     </div>
                     <div class="summary-item-meta">
                         ${dateStr ? `<span>${dateStr}</span>` : ''}
-                        <span>${quoteCount} quotes</span>
+                        ${quoteCount === null ? '' : `<span>${quoteCount} quotes</span>`}
                     </div>
                     ${isSelected ? `
                         <div class="summary-item-controls">
-                            <button class="summary-move-up" ${order === 1 ? 'disabled' : ''}>
+                            <button aria-label="Move summary earlier" class="summary-move-up" ${order === 1 ? 'disabled' : ''}>
                                 <i class="fa-solid fa-arrow-up"></i>
                             </button>
-                            <button class="summary-move-down" ${order === this.selectedComprehensiveSummaries.length ? 'disabled' : ''}>
+                            <button aria-label="Move summary later" class="summary-move-down" ${order === this.selectedComprehensiveSummaries.length ? 'disabled' : ''}>
                                 <i class="fa-solid fa-arrow-down"></i>
                             </button>
                         </div>
@@ -665,6 +631,7 @@ export class ScenarioCrafterModal {
             `);
             
             item.find('input[type="checkbox"]').on('change', (e) => {
+                this.invalidateResult();
                 if ($(e.target).is(':checked')) {
                     const maxOrder = this.selectedComprehensiveSummaries.reduce((max, s) => 
                         Math.max(max, s.order), 0);
@@ -695,6 +662,7 @@ export class ScenarioCrafterModal {
     }
 
     moveSummary(uid, direction) {
+        this.invalidateResult();
         const index = this.selectedComprehensiveSummaries.findIndex(s => s.uid === uid);
         if (index === -1) return;
         
@@ -734,7 +702,9 @@ export class ScenarioCrafterModal {
         }, 0);
         
         const totalCount = count + (hasCustom ? 1 : 0);
-        infoEl.text(`${totalCount} ${totalCount === 1 ? 'summary' : 'summaries'}, ${totalQuotes} quotes`);
+        const quotesKnown = this.selectedComprehensiveSummaries.every(selected =>
+            Array.isArray(this.availableComprehensiveSummaries.find(s => s.uid === selected.uid)?.quotes));
+        infoEl.text(`${totalCount} ${totalCount === 1 ? 'summary' : 'summaries'}${quotesKnown ? `, ${totalQuotes} quotes` : ''}`);
     }
     
     showCustomSummaryEditor() {
@@ -792,14 +762,21 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
             </div>
         `);
         
+        let releaseDialog;
+        const closePopup = () => {
+            releaseDialog?.();
+            popup.animate({ opacity: 0 }, 200, () => popup.remove());
+        };
+
         // Set current position
         popup.find('#custom-summary-position').val(this.customSummaryOrder);
         
         popup.find('.cancel-btn, .scenariocrafter-popup-overlay').on('click', () => {
-            popup.animate({ opacity: 0 }, 200, () => popup.remove());
+            closePopup();
         });
         
         popup.find('.save-btn').on('click', () => {
+            this.invalidateResult();
             this.customSummaryTitle = popup.find('#custom-summary-title').val().trim() || 'Custom Background';
             this.customSummaryText = popup.find('#custom-summary-text').val().trim();
             this.customSummaryOrder = parseInt(popup.find('#custom-summary-position').val());
@@ -815,10 +792,11 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
                 this.modal.find('#sc-custom-summary-preview').show();
             }
             
-            popup.animate({ opacity: 0 }, 200, () => popup.remove());
+            closePopup();
         });
         
         $('body').append(popup);
+        releaseDialog = manageDialog(popup[0], closePopup);
         popup.animate({ opacity: 1 }, 200);
         popup.find('#custom-summary-text').focus();
     }
@@ -848,7 +826,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         `).show();
     }
 
-    getSelectedComprehensiveSummaries() {
+    async getSelectedComprehensiveSummaries() {
         const hasCustom = this.modal.find('#sc-use-custom-summary').is(':checked') && this.customSummaryText;
         
         if (!this.includeComprehensive) {
@@ -856,12 +834,19 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         }
         
         // Get comprehensive summaries
-        let summaries = this.selectedComprehensiveSummaries
+        const references = [...this.selectedComprehensiveSummaries]
             .sort((a, b) => a.order - b.order)
             .map(selected => {
                 return this.availableComprehensiveSummaries.find(s => s.uid === selected.uid);
             })
             .filter(s => s !== undefined);
+
+        invalidateArchiveCache();
+        const summaries = [];
+        for (const reference of references) {
+            summaries.push(await loadComprehensiveSummary(reference));
+            if (this._generationCancelled) return [];
+        }
         
         // Insert custom summary at specified position
         if (hasCustom) {
@@ -1036,6 +1021,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     }
 
     selectTwistCategory(category) {
+        this.invalidateResult();
         this.state.category = category;
         this.state.subcategory = null;
 
@@ -1079,6 +1065,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     }
 
     selectTropeCategory(category) {
+        this.invalidateResult();
         this.state.category = category;
         this.state.subcategory = null;
 
@@ -1105,6 +1092,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     }
 
     selectTrope(tropeName) {
+        this.invalidateResult();
         this.state.subcategory = tropeName;
         // Reset lead role on every new trope selection so it never carries over stale state.
         this.state.leadRole = 'char';
@@ -1151,6 +1139,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
 
         toggle.find('button').on('click', (e) => {
             const lead = $(e.currentTarget).data('lead');
+            this.invalidateResult();
             this.state.leadRole = lead;
             toggle.find('button').removeClass('active');
             $(e.currentTarget).addClass('active');
@@ -1183,6 +1172,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     }
 
     selectMoodCategory(mood) {
+        this.invalidateResult();
         this.state.category = mood;
         this.state.subcategory = null;
 
@@ -1206,6 +1196,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     }
 
     selectMoodSituation(situationName) {
+        this.invalidateResult();
         this.state.subcategory = situationName;
 
         const container = this.modal.find('#sc-scenario-options');
@@ -1219,14 +1210,19 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         descContainer.html(`<strong>${escapeHtml(situationName)}</strong><br>${escapeHtml(prompt)}`).show();
     }
 
+    invalidateResult() {
+        this.generationVersion++;
+        this.generatedResult = null;
+        this.cachedElements?.applyBtn.prop('disabled', true);
+    }
+
     attachEventListeners() {
+        if (this._listenersAttached) return;
+        this._listenersAttached = true;
+        this.modal.on('input change', '.scenariocrafter-config input, .scenariocrafter-config select, .scenariocrafter-config textarea', () => this.invalidateResult());
         // Store bound handlers for cleanup
         this._boundHandlers = {
             openModal: () => this.show(),
-            escapeKey: (e) => {
-                if (!this.modal.is(':visible')) return;
-                if (e.key === 'Escape') this.hide();
-            }
         };
         
         // External open trigger
@@ -1244,6 +1240,9 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         // Character select
         this.cachedElements.characterSelect.on('change', (e) => {
             this.state.selectedCharacter = parseInt($(e.target).val());
+            this._summaryLoadId = (this._summaryLoadId || 0) + 1;
+            this.availableComprehensiveSummaries = [];
+            this.selectedComprehensiveSummaries = [];
             log('Character changed to:', this.state.selectedCharacter);
             
             // Reload summaries if showing (they're filtered by character)
@@ -1328,7 +1327,7 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         });
 
         // Generate button
-        this.cachedElements.generateBtn.on('click', () => this.handleGenerate());
+        this.cachedElements.generateBtn.on('click', () => this.isInitialized ? this.handleGenerate() : this.show());
 
         // View prompt button
         this.cachedElements.viewPrompt.on('click', () => this.viewPrompt());
@@ -1336,11 +1335,10 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
         // Apply button
         this.cachedElements.applyBtn.on('click', () => this.handleApply());
 
-        // Escape key (using bound handler for cleanup)
-        $(document).on('keydown.scenariocrafter', this._boundHandlers.escapeKey);
     }
 
     switchScenarioType(type) {
+        this.invalidateResult();
         this.state.scenarioType = type;
         this.state.category = null;
         this.state.subcategory = null;
@@ -1352,151 +1350,70 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     }
 
     async showWorldInfoSelector() {
-        const selector = new WorldInfoSelector(this.state.enabledBooks, this.state.selectedEntries);
+        const selector = new WorldInfoSelector(this.state.enabledBooks, this.state.selectedEntries, this.state);
         const result = await selector.show();
         if (result) {
+            this.invalidateResult();
             this.state.selectedEntries = result;
             updateSettings({ selected_entries: result });
         }
     }
 
     async handleGenerate() {
-        if (this.isGenerating) return;
-
+        if (this.isGenerating || this.isApplying || this._charactersDirty) return;
+        this.invalidateResult();
+        const version = this.generationVersion;
         this.isGenerating = true;
         this._generationCancelled = false;
+        this.state.generatedText = '';
+        this.lastPrompt = null;
+        this.cachedElements.viewPrompt.prop('disabled', true);
+        this.cachedElements.scenarioNote.val('');
         const btn = this.cachedElements.generateBtn;
         const originalHtml = btn.html();
-
-        // Clear any existing injection from a previous scenario so it doesn't persist during generation
-        try {
-            const { extension_prompt_types } = await import('../../../../../script.js');
-            const ctx = SillyTavern.getContext();
-            ctx.setExtensionPrompt('scenariocrafter_inject', '', extension_prompt_types.IN_CHAT, 0, false);
-        } catch (e) {
-            logError('Failed to clear old injection:', e);
-        }
-        
-        // Clear stale scenario note from previous generation
-        this.cachedElements.scenarioNote.val('');
-        this.state.scenarioSummary = '';
-
-        // Switch to Stop button
+        const outputContent = this.cachedElements.outputContent;
         btn.removeClass('scenariocrafter-btn-primary').addClass('scenariocrafter-btn-danger');
         btn.html('<i class="fa-solid fa-stop"></i> Stop');
         btn.off('click').on('click', () => {
-            if (!this.isGenerating) return;
             this._generationCancelled = true;
-            log('Generation cancelled by user');
-            btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Stopping...');
-            try {
-                const ctx = SillyTavern.getContext();
-                if (ctx.eventSource && ctx.event_types?.GENERATION_STOPPED) {
-                    ctx.eventSource.emit(ctx.event_types.GENERATION_STOPPED);
-                }
-            } catch (e) {
-                logError('Failed to emit stop event:', e);
-            }
+            btn.prop('disabled', true).html('Stopping...');
+            const context = SillyTavern.getContext();
+            context.eventSource.emit(context.event_types.GENERATION_STOPPED);
         });
-
-        const outputContent = this.cachedElements.outputContent;
         outputContent.html('<div class="scenariocrafter-loading"><i class="fa-solid fa-spinner fa-spin fa-3x"></i></div>');
-
-        // Save current profile ONCE at the start
-        let currentProfile = null;
-        const context = SillyTavern.getContext();
-        
         try {
-            // Switch to connection profile if specified
-            if (this.state.connectionProfile) {
-                const profilesActive = $('#sys-settings-button').find('#connection_profiles').length > 0;
-                
-                if (profilesActive) {
-                    const currentResult = await context.executeSlashCommandsWithOptions('/profile');
-                    currentProfile = currentResult.pipe;
-                    
-                    if (currentProfile !== this.state.connectionProfile) {
-                        log('Switching to connection profile:', this.state.connectionProfile);
-                        await context.executeSlashCommandsWithOptions(`/profile ${this.state.connectionProfile}`);
-                        // Wait for profile to fully apply
-                        await new Promise(resolve => setTimeout(resolve, 1500));
-                    }
-                }
-            }
-
-            // Get selected comprehensive summaries
-            const comprehensiveSummaries = this.getSelectedComprehensiveSummaries();
-
-            // Update state
-            this.state.includeComprehensive = this.includeComprehensive;
-            this.state.selectedComprehensiveSummaries = comprehensiveSummaries;
-
-            // Generate scenario
-            const result = await generateScenario(this.state);
-            
-            if (this._generationCancelled) return;
-            
-            this.state.generatedText = result.text;
-            this.lastPrompt = result.prompt;
-
-            // Clear loading, show textarea
-            outputContent.empty();
-            
-            const textarea = $('<textarea class="scenariocrafter-textarea" id="sc-generated-text" rows="15"></textarea>');
-            textarea.val(result.text);
-            outputContent.append(textarea);
-            
-            // Bind input handler
-            textarea.on('input', () => {
-                this.state.generatedText = textarea.val();
+            const result = await generateScenarioDraft({ ...this.state, includeComprehensive: this.includeComprehensive }, {
+                shouldCancel: () => this._generationCancelled || version !== this.generationVersion,
+                prepareSummaries: () => this.getSelectedComprehensiveSummaries(),
+                onSummary: () => btn.html('<i class="fa-solid fa-stop"></i> Stop (writing scenario note)'),
             });
-
+            if (this._generationCancelled || version !== this.generationVersion) return;
+            this.generatedResult = result;
+            this.state.generatedText = result.text;
+            this.state.scenarioSummary = result.summary;
+            this.lastPrompt = result.prompt;
+            outputContent.empty();
+            const textarea = $('<textarea class="scenariocrafter-textarea" id="sc-generated-text" rows="15" aria-label="Generated scenario"></textarea>');
+            textarea.val(result.text).on('input', () => {
+                this.state.generatedText = textarea.val();
+                this.cachedElements.applyBtn.prop('disabled', !this.generatedResult || !this.state.generatedText.trim());
+            });
+            outputContent.append(textarea);
+            this.cachedElements.scenarioNote.val(result.summary);
             this.cachedElements.viewPrompt.prop('disabled', false);
             this.cachedElements.applyBtn.prop('disabled', false);
-            
-            // Generate summary (still on scenario profile)
-            const char = context.characters[this.state.selectedCharacter];
-            const charName = char?.name || 'Character';
-            
-            btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Generating summary...');
-            const summary = await generateSummary(result.text, charName);
-            this.state.scenarioSummary = summary;
-            this.cachedElements.scenarioNote.val(summary);
-            
             toastr.success('Scenario generated!', 'Scenario Crafter');
-
         } catch (error) {
-            if (this._generationCancelled) {
-                log('Generation was cancelled');
-                outputContent.html(`
-                    <div class="scenariocrafter-placeholder">
-                        <i class="fa-solid fa-hand fa-3x"></i>
-                        <p>Generation stopped</p>
-                    </div>
-                `);
-                toastr.info('Generation stopped', 'Scenario Crafter');
-            } else {
-                logError('Generation error:', error);
-                outputContent.html(`
-                    <div class="scenariocrafter-error">
-                        <i class="fa-solid fa-triangle-exclamation fa-3x"></i>
-                        <p>${escapeHtml(error.message || 'Failed to generate scenario')}</p>
-                    </div>
-                `);
-                toastr.error('Generation failed', 'Scenario Crafter');
-            }
+            const cancelled = this._generationCancelled || version !== this.generationVersion;
+            outputContent.html(`<div class="scenariocrafter-error"><p>${escapeHtml(cancelled
+                ? 'Generation stopped or the configuration changed. Generate again when ready.'
+                : error.message || 'Failed to generate scenario')}</p></div>`);
+            if (!cancelled) { logError('Generation error:', error); toastr.error(error.message, 'Scenario Crafter'); }
         } finally {
-            // Restore connection profile AFTER all generation is complete
-            if (currentProfile && this.state.connectionProfile && currentProfile !== this.state.connectionProfile) {
-                log('Restoring connection profile:', currentProfile);
-                await context.executeSlashCommandsWithOptions(`/profile ${currentProfile}`);
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-            
             this.isGenerating = false;
             this._generationCancelled = false;
             btn.removeClass('scenariocrafter-btn-danger').addClass('scenariocrafter-btn-primary');
-            btn.prop('disabled', false).html(originalHtml);
+            btn.prop('disabled', !!this._charactersDirty).html(originalHtml);
             btn.off('click').on('click', () => this.handleGenerate());
         }
     }
@@ -1553,175 +1470,112 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
             </div>
         `);
 
-        popup.find('.scenariocrafter-popup-close, .scenariocrafter-popup-overlay').on('click', () => {
+        let releaseDialog;
+        const closePopup = () => {
+            releaseDialog?.();
             popup.animate({ opacity: 0 }, 200, () => popup.remove());
+        };
+
+        popup.find('.scenariocrafter-popup-close, .scenariocrafter-popup-overlay').on('click', () => {
+            closePopup();
         });
 
         $('body').append(popup);
+        releaseDialog = manageDialog(popup[0], closePopup);
         popup.animate({ opacity: 1 }, 200);
     }
 
     async handleApply() {
-        if (!this.state.generatedText) return;
-
-        const applyMode = this.state.applyMode;
-        const addInjection = this.cachedElements.addInjection.is(':checked');
-        const scenarioNote = this.cachedElements.scenarioNote.val();
-        
-        const context = SillyTavern.getContext();
-        const settings = getSettings();
-        
+        if (this.isGenerating || this.isApplying || !this.generatedResult) return;
+        const result = this.generatedResult;
         const applyBtn = this.cachedElements.applyBtn;
-        applyBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Applying...');
-
+        this.isApplying = true;
+        applyBtn.prop('disabled', true).html('Applying...');
         try {
-            // Switch to selected persona if different from current
-            if (this.state.selectedPersona && this.state.selectedPersona !== window.user_avatar) {
-                log('Switching to persona:', this.state.selectedPersona);
-                applyBtn.html('<i class="fa-solid fa-spinner fa-spin"></i> Switching persona...');
-                
-                const { setUserAvatar } = await import('../../../../personas.js');
-                await setUserAvatar(this.state.selectedPersona);
-                
-                // Brief wait for persona switch to complete
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-
-            if (applyMode === 'rewrite-last') {
-                // REWRITE MODE: Replace last message
-                if (!context.chat || context.chat.length === 0) {
-                    throw new Error('No chat history to rewrite');
-                }
-                
-                applyBtn.html('<i class="fa-solid fa-spinner fa-spin"></i> Rewriting message...');
-                
-                const lastMessage = context.chat[context.chat.length - 1];
-                lastMessage.mes = this.state.generatedText;
-                
-                await context.saveChat();
-                await context.reloadCurrentChat();
-                
-                toastr.success('Message rewritten!', 'Scenario Crafter');
-                
-            } else if (applyMode === 'new-chat') {
-                // NEW CHAT MODE
-                log('Switching to character index:', this.state.selectedCharacter);
-                applyBtn.html('<i class="fa-solid fa-spinner fa-spin"></i> Switching character...');
-                
-                await context.selectCharacterById(this.state.selectedCharacter);
-                // Wait for character switch to process
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                applyBtn.html('<i class="fa-solid fa-spinner fa-spin"></i> Creating new chat...');
-                
-                // Create new chat
-                await context.executeSlashCommandsWithOptions('/newchat');
-                // Wait for new chat creation
-                await new Promise(resolve => setTimeout(resolve, 200));
-                
-                // Delete the default greeting
-                await context.executeSlashCommandsWithOptions('/del 1');
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                // Add injection if requested
-                if (addInjection && scenarioNote) {
-                    const { extension_prompt_types, extension_prompt_roles } = await import('../../../../../script.js');
-                    
-                    context.setExtensionPrompt(
-                        'scenariocrafter_inject',
-                        `[Scenario: ${scenarioNote}]`,
-                        extension_prompt_types.IN_CHAT,
-                        settings.injection_depth,
-                        false,
-                        extension_prompt_roles.SYSTEM
-                    );
-                }
-                
-                const char = context.characters[this.state.selectedCharacter];
-                const charName = char?.name || 'Character';
-                
-                applyBtn.html('<i class="fa-solid fa-spinner fa-spin"></i> Sending message...');
-                await context.executeSlashCommandsWithOptions(`/sendas name="${charName}" ${this.state.generatedText}`);
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                toastr.success('Scenario applied!', 'Scenario Crafter');
-                
-            } else {
-                // APPEND MODE
-                if (addInjection && scenarioNote) {
-                    const { extension_prompt_types, extension_prompt_roles } = await import('../../../../../script.js');
-                    
-                    context.setExtensionPrompt(
-                        'scenariocrafter_inject',
-                        `[Scenario: ${scenarioNote}]`,
-                        extension_prompt_types.IN_CHAT,
-                        settings.injection_depth,
-                        false,
-                        extension_prompt_roles.SYSTEM
-                    );
-                }
-                
-                const char = context.characters[this.state.selectedCharacter];
-                const charName = char?.name || 'Character';
-                
-                applyBtn.html('<i class="fa-solid fa-spinner fa-spin"></i> Sending message...');
-                await context.executeSlashCommandsWithOptions(`/sendas name="${charName}" ${this.state.generatedText}`);
-                
-                toastr.success('Scenario applied!', 'Scenario Crafter');
-            }
-
-            // Re-enable button before hiding
-            applyBtn.prop('disabled', false).html('<i class="fa-solid fa-paper-plane"></i> Apply Scenario');
+            assertScenarioTarget(result.target, SillyTavern.getContext());
+            await applyScenarioDraft(result, {
+                text: this.state.generatedText,
+                addInjection: this.cachedElements.addInjection.is(':checked'),
+                scenarioNote: this.cachedElements.scenarioNote.val(),
+                injectionDepth: getSettings().injection_depth,
+            });
+            this.invalidateResult();
+            toastr.success('Scenario applied!', 'Scenario Crafter');
             this.hide();
-
         } catch (error) {
             logError('Apply error:', error);
-            toastr.error('Failed to apply scenario: ' + error.message, 'Scenario Crafter');
-            applyBtn.prop('disabled', false).html('<i class="fa-solid fa-paper-plane"></i> Apply Scenario');
+            toastr.error(error.message, 'Scenario Crafter');
+        } finally {
+            this.isApplying = false;
+            applyBtn.prop('disabled', !this.generatedResult).html('<i class="fa-solid fa-paper-plane"></i> Apply Scenario');
         }
     }
 
     async show() {
-        // Lazy initialize on first show
-        if (!this.isInitialized) {
-            this.isInitialized = true;
-            
-            // Show modal first
-            this.modal.css('display', 'flex');
-            this.modal[0].offsetHeight; // Force reflow
-            this.modal.addClass('scenariocrafter-modal-visible');
-            $('body').addClass('scenariocrafter-modal-open');
-            requestAnimationFrame(() => this.draggableModal?.clamp());
-            
-            // Attach event listeners FIRST
-            this.attachEventListeners();
-            
-            // Then load data
-            try {
-                await this.loadInitialData();
-            } catch (error) {
-                logError('Failed to initialize modal:', error);
-                toastr.error('Failed to load Scenario Crafter', 'Error');
-                this.hide();
+        if (this._destroyed) return;
+        try {
+            if (this.generatedResult) {
+                try { assertScenarioTarget(this.generatedResult.target, SillyTavern.getContext()); }
+                catch { this.invalidateResult(); }
             }
-        } else {
-            // Already initialized, just show and update chat-dependent controls
+            const settings = getSettings();
+            for (const [key, field] of [['apply_mode', 'applyMode'], ['default_tone', 'tone'], ['profileId', 'connectionProfile'],
+                ['include_chat_history', 'includeHistory'], ['history_range', 'historyRange'],
+                ['include_world_info', 'includeWorldInfo'], ['world_info_mode', 'worldInfoMode']]) {
+                if (settings[key] !== this.defaultSettings[key]) { this.state[field] = settings[key]; this.invalidateResult(); }
+            }
+            if (settings.add_scenario_injection !== this.defaultSettings.add_scenario_injection) {
+                this.cachedElements.addInjection.prop('checked', settings.add_scenario_injection);
+            }
+            this.defaultSettings = settings;
             this.modal.css('display', 'flex');
-            this.modal[0].offsetHeight; // Force reflow
+            this.modal[0].offsetHeight;
             this.modal.addClass('scenariocrafter-modal-visible');
             $('body').addClass('scenariocrafter-modal-open');
+            if (!this.releaseDialog) this.releaseDialog = manageDialog(this.modal[0], () => this.hide());
             requestAnimationFrame(() => this.draggableModal?.clamp());
-            
-            // Update controls based on current chat state
+            this.attachEventListeners();
+            if (!this.isInitialized) return await this.initialize();
+
+            if (this._charactersDirty && !await this.populateCharacters()) return;
+            if (this._destroyed || !this.modal.hasClass('scenariocrafter-modal-visible')) return;
+            if (this.characterSelector.needsRender && !await this.characterSelector.render()) return;
+            if (this.personaSelector.needsRender && !await this.personaSelector.render()) return;
+            if (this._destroyed || !this.modal.hasClass('scenariocrafter-modal-visible')) return;
             this.updateChatDependentControls();
+            this.cachedElements.applyModeSelect.val(this.state.applyMode);
+            this.populateToneSelector();
+            this.cachedElements.profileSelect.val(this.state.connectionProfile);
+            this.cachedElements.includeHistory.prop('checked', this.state.includeHistory);
+            this.cachedElements.historyRange.val(this.state.historyRange);
+            this.cachedElements.historyRangeContainer.toggle(this.state.includeHistory);
+            this.cachedElements.includeWorldInfo.prop('checked', this.state.includeWorldInfo);
+            this.cachedElements.worldInfoOptions.toggle(this.state.includeWorldInfo);
+            this.modal.find(`input[name="sc-wi-mode"][value="${this.state.worldInfoMode}"]`).prop('checked', true);
+            this.cachedElements.selectEntries.toggle(this.state.worldInfoMode === 'selected');
+        } catch (error) {
+            logError('Could not open Scenario Crafter:', error);
+            toastr.error('Could not open Scenario Crafter. Close and reopen the panel to retry.', 'Scenario Crafter');
         }
     }
 
+    cancelLoading() {
+        this._initializationController?.abort();
+        this._initializationController = null;
+        this._initializationPromise = null;
+        this.characterSelector.cancel();
+        this.personaSelector.cancel();
+        this.modal?.attr('aria-busy', 'false');
+    }
+
     hide() {
+        this.cancelLoading();
+        this.releaseDialog?.();
+        this.releaseDialog = null;
         this.modal.removeClass('scenariocrafter-modal-visible');
         // Wait for transition before hiding
         setTimeout(() => {
-            if (!this.modal.hasClass('scenariocrafter-modal-visible')) {
+            if (this.modal && !this.modal.hasClass('scenariocrafter-modal-visible')) {
                 this.modal.css('display', 'none');
             }
         }, 200);
@@ -1730,12 +1584,20 @@ The war between the Dragon Clans had raged for decades. {{char}} served as a sco
     
     destroy() {
         log('Destroying modal...');
+        this._destroyed = true;
+        this.cancelLoading();
+        this.characterSelector.destroy();
+        this.personaSelector.destroy();
+        this._generationCancelled = true;
+        this.invalidateResult();
+        this.releaseDialog?.();
+        const context = SillyTavern.getContext();
+        context.eventSource.removeListener(context.event_types.CHAT_CHANGED, this.onChatChanged);
         this.draggableModal?.destroy();
         
         // Remove document-level event listeners
         if (this._boundHandlers) {
             document.removeEventListener('sc-open-modal', this._boundHandlers.openModal);
-            $(document).off('keydown.scenariocrafter', this._boundHandlers.escapeKey);
         }
         
         // Remove modal event listeners

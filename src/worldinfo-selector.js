@@ -1,10 +1,13 @@
 import { log, logError, escapeHtml, worldBookCache } from './utils.js';
 import { getSettings } from './settings.js';
+import { getAvailableWorldBooks, cloneSelectedEntries } from './worldbook-discovery.js';
+import { manageDialog } from './dialog-accessibility.js';
 
 export class WorldInfoSelector {
-    constructor(enabledBooks, selectedEntries) {
+    constructor(enabledBooks, selectedEntries, state = {}) {
         this.enabledBooks = { ...enabledBooks };
-        this.selectedEntries = { ...selectedEntries };
+        this.selectedEntries = cloneSelectedEntries(selectedEntries);
+        this.state = { ...state, enabledBooks: this.enabledBooks };
         this.modal = null;
         this.resolve = null;
     }
@@ -48,6 +51,7 @@ export class WorldInfoSelector {
         `);
 
         $('body').append(this.modal);
+        this.releaseDialog = manageDialog(this.modal[0], () => this.close(null));
     }
 
     async loadWorldBooks() {
@@ -57,7 +61,7 @@ export class WorldInfoSelector {
             const context = SillyTavern.getContext();
             
             // Get available world books from UI
-            const bookNames = this.getAvailableWorldBooks();
+            const bookNames = getAvailableWorldBooks(this.state, context);
             
             if (bookNames.length === 0) {
                 container.html('<div class="scenariocrafter-placeholder"><p>No active world books found. Make sure you have world info enabled in your character/chat settings.</p></div>');
@@ -175,20 +179,6 @@ export class WorldInfoSelector {
         }
     }
 
-    getAvailableWorldBooks() {
-        const books = [];
-        
-        // Parse the world_info select element to get active book names
-        $('#world_info option:selected').each(function() {
-            const bookName = $(this).text().trim();
-            if (bookName && bookName !== 'slot') {
-                books.push(bookName);
-            }
-        });
-        
-        return books;
-    }
-
     async loadWorldBook(bookName, context) {
         // Check shared cache first
         if (worldBookCache.has(bookName)) {
@@ -254,7 +244,7 @@ export class WorldInfoSelector {
         // Entry checkboxes
         this.modal.on('change', 'input[type="checkbox"]', (e) => {
             const book = $(e.target).data('book');
-            const uid = $(e.target).data('uid');
+            const uid = String($(e.target).attr('data-uid'));
             const checked = $(e.target).is(':checked');
 
             if (!this.selectedEntries[book]) {
@@ -297,11 +287,11 @@ export class WorldInfoSelector {
     }
 
     selectBook(book) {
-        this.modal.find(`input[type="checkbox"][data-book="${book}"]`).prop('checked', true).trigger('change');
+        this.modal.find('input[type="checkbox"]').filter((_, input) => input.getAttribute('data-book') === book).prop('checked', true).trigger('change');
     }
 
     deselectBook(book) {
-        this.modal.find(`input[type="checkbox"][data-book="${book}"]`).prop('checked', false).trigger('change');
+        this.modal.find('input[type="checkbox"]').filter((_, input) => input.getAttribute('data-book') === book).prop('checked', false).trigger('change');
     }
 
     updateCount() {
@@ -313,6 +303,9 @@ export class WorldInfoSelector {
     }
 
     close(result) {
+        if (this.closing) return;
+        this.closing = true;
+        this.releaseDialog?.();
         this.modal.animate({ opacity: 0 }, 200, () => {
             this.modal.remove();
             if (this.resolve) {
